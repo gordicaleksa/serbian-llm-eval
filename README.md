@@ -77,4 +77,6 @@ python main.py \
 
 or open `main.py` and run using vscode debugger.
 
+Note: again please sync on Discord about which tasks you should help to translate! :)
+
 
