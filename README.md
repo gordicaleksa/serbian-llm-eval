@@ -6,7 +6,7 @@
 
 * if this is the first time you're creating a gcloud project you'll have 300$ of free credits!
 
-* only translate a subset of the above tasks, sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm.
+* only translate a subset of the above tasks, sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm channel.
 
 # Instructions for translating lm harness eval from English into Serbian
 
