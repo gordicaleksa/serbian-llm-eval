@@ -173,17 +173,16 @@ def get_translate_fn(client, parent, target_lang):
     def translate_helper_fn(src_str):
         assert isinstance(src_str, str), f"Expected str, got {src_str}"
 
-        # response = client.translate_text(
-        #     request={
-        #         "parent": parent,
-        #         "contents": [src_str],
-        #         "mime_type": "text/plain",
-        #         "source_language_code": "en-US",
-        #         "target_language_code": target_lang,
-        #     }
-        # )
-        # trg_str = response.translations[0].translated_text
-        trg_str = "dummy"
+        response = client.translate_text(
+            request={
+                "parent": parent,
+                "contents": [src_str],
+                "mime_type": "text/plain",
+                "source_language_code": "en-US",
+                "target_language_code": target_lang,
+            }
+        )
+        trg_str = response.translations[0].translated_text
         return trg_str
 
     return translate_helper_fn
@@ -243,15 +242,16 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
     return num_chars_dataset
 
 
-def translate_eval(task_dict_items, target_lang="sr"):
+def translate_eval(task_dict_items, target_lang="sr", project_id="ortus-391014"):
     assert target_lang == "sr", "Only Serbian (Cyrillic) is supported for now"
 
     client = translate.TranslationServiceClient()
     location = "global"
-    project_id="ortus-391014"
     parent = f"projects/{project_id}/locations/{location}"
 
-    out_dir = "/home/aleksa/Projects/eval/english/lm-evaluation-harness/serbian_eval"
+    this_file_path = os.path.dirname(os.path.realpath(__file__))
+    parent_dir_path = os.path.abspath(os.path.join(this_file_path, os.pardir))
+    out_dir = os.path.join(parent_dir_path, "serbian_eval")
     os.makedirs(out_dir, exist_ok=True)
 
     translate_fn = get_translate_fn(client, parent, target_lang)
