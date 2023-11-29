@@ -12,6 +12,9 @@ from lm_eval.models.gpt2 import HFLM
 import numpy as np
 import transformers
 
+import json
+import os
+from google.cloud import translate
 
 @positional_deprecated
 def simple_evaluate(
@@ -73,14 +76,15 @@ def simple_evaluate(
     if isinstance(model, str):
         if model_args is None:
             model_args = ""
-        lm = lm_eval.models.get_model(model).create_from_arg_string(
-            model_args,
-            {
-                "batch_size": batch_size,
-                "max_batch_size": max_batch_size,
-                "device": device,
-            },
-        )
+        # lm = lm_eval.models.get_model(model).create_from_arg_string(
+        #     model_args,
+        #     {
+        #         "batch_size": batch_size,
+        #         "max_batch_size": max_batch_size,
+        #         "device": device,
+        #     },
+        # )
+        lm = None
     elif isinstance(model, transformers.PreTrainedModel):
         lm = lm_eval.models.get_model("hf-causal")(
             pretrained=model,
@@ -92,15 +96,15 @@ def simple_evaluate(
         assert isinstance(model, lm_eval.base.LM)
         lm = model
 
-    if not no_cache:
-        lm = lm_eval.base.CachingLM(
-            lm,
-            "lm_cache/"
-            + (model if isinstance(model, str) else model.model.config._name_or_path)
-            + "_"
-            + model_args.replace("=", "-").replace(",", "_").replace("/", "-")
-            + ".db",
-        )
+    # if not no_cache:
+    #     lm = lm_eval.base.CachingLM(
+    #         lm,
+    #         "lm_cache/"
+    #         + (model if isinstance(model, str) else model.model.config._name_or_path)
+    #         + "_"
+    #         + model_args.replace("=", "-").replace(",", "_").replace("/", "-")
+    #         + ".db",
+    #     )
 
     task_dict = lm_eval.tasks.get_task_dict(tasks)
 
@@ -144,6 +148,135 @@ def simple_evaluate(
 
 
 decontaminate_suffix = "_decontaminate"
+
+
+def get_keys_of_interest(task_name):
+    task_to_keys_of_interest = {
+        # Common Sense
+        "hellaswag": ["query", "choices"],
+        "winogrande": ["sentence", "option1", "option2"],
+        "piqa": ["goal", "choices"],
+        "openbookqa": ["query", "choices"],
+        "arc_easy": ["query", "choices"],
+        "arc_challenge": ["query", "choices"],
+        # Knowledge
+        "nq_open": ["question", "answer"],
+        "triviaqa": ["question", "answer/value", "answer/aliases"],
+        # Reading Comprehension
+        "boolq": ["passage", "question"],
+    }
+
+    return task_to_keys_of_interest[task_name]
+
+
+def get_translate_fn(client, parent, target_lang):
+    def translate_helper_fn(src_str):
+        assert isinstance(src_str, str), f"Expected str, got {src_str}"
+
+        # response = client.translate_text(
+        #     request={
+        #         "parent": parent,
+        #         "contents": [src_str],
+        #         "mime_type": "text/plain",
+        #         "source_language_code": "en-US",
+        #         "target_language_code": target_lang,
+        #     }
+        # )
+        # trg_str = response.translations[0].translated_text
+        trg_str = "dummy"
+        return trg_str
+
+    return translate_helper_fn
+
+
+def translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, all_docs, out_dir, is_test=True):
+    num_chars_dataset = 0
+    with open(os.path.join(out_dir, f'{task_name}{"_test" if is_test else "_train"}.jsonl'), 'w') as f:
+        for doc_index, doc in enumerate(all_docs):
+            translated_doc = doc.copy()  # create a copy of the doc
+
+            for outer_key, outer_value in doc.items():
+                if not outer_key in first_level_keys:
+                    continue
+
+                if isinstance(outer_value, str):
+                    num_chars_dataset += len(outer_value)
+                    translated_doc[outer_key] = translate_fn(outer_value)
+
+                elif isinstance(outer_value, list):
+                    assert all(isinstance(x, str) for x in outer_value), f'Expected all values in list to be str, but found {outer_value}'
+
+                    num_chars_dataset += sum(len(x) for x in outer_value)
+
+                    translated_list = []
+                    for _, inner_value in enumerate(outer_value):
+                        translated_list.append(translate_fn(inner_value))
+                    translated_doc[outer_key] = translated_list
+
+                elif isinstance(outer_value, dict):
+                    for inner_key, inner_value in outer_value.items():
+                        if not inner_key in second_level_keys:
+                            continue
+
+                        if isinstance(inner_value, str):
+                            num_chars_dataset += len(inner_value)
+                            translated_doc[outer_key][inner_key] = translate_fn(inner_value)
+
+                        elif isinstance(inner_value, list):
+                            assert all(isinstance(x, str) for x in inner_value)
+
+                            num_chars_dataset += sum(len(x) for x in inner_value)
+
+                            translated_list = []
+                            for _, x in enumerate(inner_value):
+                                translated_list.append(translate_fn(x))
+                            translated_doc[outer_key][inner_key] = translated_list
+                        else:
+                            raise RuntimeError(f"Unexpected value type in doc in {outer_key} -> {inner_key}")
+                else:
+                    raise RuntimeError("Unexpected value type in doc")
+
+            f.write(json.dumps(translated_doc) + "\n")  # write the translated doc to file
+
+        print(f"Task: {task_name}; number of chars: {num_chars_dataset}")
+
+    return num_chars_dataset
+
+
+def translate_eval(task_dict_items, target_lang="sr"):
+    assert target_lang == "sr", "Only Serbian (Cyrillic) is supported for now"
+
+    client = translate.TranslationServiceClient()
+    location = "global"
+    project_id="ortus-391014"
+    parent = f"projects/{project_id}/locations/{location}"
+
+    out_dir = "/home/aleksa/Projects/eval/english/lm-evaluation-harness/serbian_eval"
+    os.makedirs(out_dir, exist_ok=True)
+
+    translate_fn = get_translate_fn(client, parent, target_lang)
+
+    num_chars_total = 0
+    for task_name, task in task_dict_items:
+        if task.has_test_docs():
+            task_doc_func = task.test_docs
+        elif task.has_validation_docs():
+            task_doc_func = task.validation_docs
+        else:
+            raise RuntimeError("Task has neither test_docs nor validation_docs")
+
+        keys_of_interest = get_keys_of_interest(task_name)
+        first_level_keys = set([x.split('/')[0] for x in keys_of_interest])
+        second_level_keys = set([x.split('/')[1] for x in keys_of_interest if len(x.split('/')) > 1])
+
+        task_docs = list(task_doc_func())
+        num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=True)
+
+        if task_name in ["nq_open", "triviaqa"]:
+            task_docs = list(task.training_docs())
+            num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=False)
+
+    print(f"Total number of chars: {num_chars_total}")
 
 
 @positional_deprecated
@@ -199,6 +332,9 @@ def evaluate(
         for name, task in task_dict.items()
         if (task.has_validation_docs() or task.has_test_docs())
     ]
+
+    translate_eval(task_dict_items)
+    exit(0)
 
     results = collections.defaultdict(dict)
     versions = collections.defaultdict(dict)
