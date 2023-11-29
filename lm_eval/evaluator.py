@@ -33,6 +33,7 @@ def simple_evaluate(
     decontamination_ngrams_path=None,
     write_out=False,
     output_base_path=None,
+    translation_project_id=None,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -121,6 +122,7 @@ def simple_evaluate(
         decontamination_ngrams_path=decontamination_ngrams_path,
         write_out=write_out,
         output_base_path=output_base_path,
+        translation_project_id=translation_project_id,
     )
 
     # add info about the model and few shot config
@@ -242,7 +244,8 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
     return num_chars_dataset
 
 
-def translate_eval(task_dict_items, target_lang="sr", project_id="ortus-391014"):
+def translate_eval(task_dict_items, target_lang="sr", project_id=None):
+    assert project_id is not None, "Project ID must be specified"
     assert target_lang == "sr", "Only Serbian (Cyrillic) is supported for now"
 
     client = translate.TranslationServiceClient()
@@ -291,6 +294,7 @@ def evaluate(
     decontamination_ngrams_path=None,
     write_out=False,
     output_base_path=None,
+    translation_project_id=None,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -333,7 +337,7 @@ def evaluate(
         if (task.has_validation_docs() or task.has_test_docs())
     ]
 
-    translate_eval(task_dict_items)
+    translate_eval(task_dict_items, project_id=translation_project_id)
     exit(0)
 
     results = collections.defaultdict(dict)

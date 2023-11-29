@@ -15,6 +15,7 @@
                 "--model", "hf",
                 "--model_args", "pretrained=mistralai/Mistral-7B-v0.1",
                 "--tasks", "hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq",
+                "--project_id", "ortus-391014"
             ]
         }
     ]

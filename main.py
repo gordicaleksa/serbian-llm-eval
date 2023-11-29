@@ -10,6 +10,7 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--translation_project_id", type=str, default=None, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
     parser.add_argument(
@@ -81,6 +82,7 @@ def main():
         check_integrity=args.check_integrity,
         write_out=args.write_out,
         output_base_path=args.output_base_path,
+        translation_project_id=args.translation_project_id,
     )
 
     dumped = json.dumps(results, indent=2)
