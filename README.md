@@ -49,7 +49,8 @@ Follow these instructions (see below for more details):
 1. Create a Python env for this project
 2. You'll find the program arguments are already specified inside `.vscode/launch.json`
 3. Change `project_id` to the google project id you got in the previous section
-4. Run the `main.py`
+4. Specify amount of characters you're willing to translate (500_000 is the usual free monthly limit)
+5. Run the `main.py`
 
 ### Create Python environment
 
@@ -70,7 +71,8 @@ python main.py \
     --model hf \
     --model_args pretrained=mistralai/Mistral-7B-v0.1 \
     --tasks hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq \
-    --project_id <your project id>
+    --translation_project_id <your project id>
+    --char_limit 500000
 ```
 
 or open `main.py` and run using vscode debugger.

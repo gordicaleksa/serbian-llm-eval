@@ -15,6 +15,7 @@ import transformers
 import json
 import os
 from google.cloud import translate
+from tqdm import tqdm
 
 @positional_deprecated
 def simple_evaluate(
@@ -34,6 +35,7 @@ def simple_evaluate(
     write_out=False,
     output_base_path=None,
     translation_project_id=None,
+    char_limit=500000,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -123,6 +125,7 @@ def simple_evaluate(
         write_out=write_out,
         output_base_path=output_base_path,
         translation_project_id=translation_project_id,
+        char_limit=char_limit,
     )
 
     # add info about the model and few shot config
@@ -171,43 +174,57 @@ def get_keys_of_interest(task_name):
     return task_to_keys_of_interest[task_name]
 
 
-def get_translate_fn(client, parent, target_lang):
+def get_translate_fn(client, parent, target_lang, debug_mode=False):
     def translate_helper_fn(src_str):
         assert isinstance(src_str, str), f"Expected str, got {src_str}"
 
-        response = client.translate_text(
-            request={
-                "parent": parent,
-                "contents": [src_str],
-                "mime_type": "text/plain",
-                "source_language_code": "en-US",
-                "target_language_code": target_lang,
-            }
-        )
-        trg_str = response.translations[0].translated_text
-        return trg_str
+        if debug_mode:  # not spending money :)
+            return "dummy"
+        else:
+            response = client.translate_text(
+                request={
+                    "parent": parent,
+                    "contents": [src_str],
+                    "mime_type": "text/plain",
+                    "source_language_code": "en-US",
+                    "target_language_code": target_lang,
+                }
+            )
+            trg_str = response.translations[0].translated_text
+            return trg_str
 
     return translate_helper_fn
 
 
-def translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, all_docs, out_dir, is_test=True):
-    num_chars_dataset = 0
+def translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, all_docs, out_dir, is_test=True, start_num_chars=None, end_num_chars=None, char_limit=500000):
+    num_chars_dataset_current = 0
+    exit_flag = False
     with open(os.path.join(out_dir, f'{task_name}{"_test" if is_test else "_train"}.jsonl'), 'w') as f:
-        for doc_index, doc in enumerate(all_docs):
+        progress_bar = tqdm(all_docs, total=end_num_chars-start_num_chars, initial=start_num_chars) if start_num_chars is not None and end_num_chars is not None else all_docs
+        for doc in progress_bar:
             translated_doc = doc.copy()  # create a copy of the doc
+
+            if exit_flag:
+                raise Exception(f"Char limit exceeded {char_limit}. Exiting...")
 
             for outer_key, outer_value in doc.items():
                 if not outer_key in first_level_keys:
                     continue
 
                 if isinstance(outer_value, str):
-                    num_chars_dataset += len(outer_value)
+                    num_chars_dataset_current += len(outer_value)
+                    if start_num_chars is not None and start_num_chars + num_chars_dataset_current > char_limit:
+                        exit_flag=True
+                        break
                     translated_doc[outer_key] = translate_fn(outer_value)
 
                 elif isinstance(outer_value, list):
                     assert all(isinstance(x, str) for x in outer_value), f'Expected all values in list to be str, but found {outer_value}'
 
-                    num_chars_dataset += sum(len(x) for x in outer_value)
+                    num_chars_dataset_current += sum(len(x) for x in outer_value)
+                    if start_num_chars is not None and start_num_chars + num_chars_dataset_current > char_limit:
+                        exit_flag=True
+                        break
 
                     translated_list = []
                     for _, inner_value in enumerate(outer_value):
@@ -220,13 +237,19 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                             continue
 
                         if isinstance(inner_value, str):
-                            num_chars_dataset += len(inner_value)
+                            num_chars_dataset_current += len(inner_value)
+                            if start_num_chars is not None and start_num_chars + num_chars_dataset_current > char_limit:
+                                exit_flag=True
+                                break
                             translated_doc[outer_key][inner_key] = translate_fn(inner_value)
 
                         elif isinstance(inner_value, list):
                             assert all(isinstance(x, str) for x in inner_value)
 
-                            num_chars_dataset += sum(len(x) for x in inner_value)
+                            num_chars_dataset_current += sum(len(x) for x in inner_value)
+                            if start_num_chars is not None and start_num_chars + num_chars_dataset_current > char_limit:
+                                exit_flag=True
+                                break
 
                             translated_list = []
                             for _, x in enumerate(inner_value):
@@ -237,14 +260,15 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                 else:
                     raise RuntimeError("Unexpected value type in doc")
 
-            f.write(json.dumps(translated_doc) + "\n")  # write the translated doc to file
+            if not exit_flag:
+                f.write(json.dumps(translated_doc) + "\n")  # write the translated doc to file
 
-        print(f"Task: {task_name}; number of chars: {num_chars_dataset}")
+        print(f"Task: {task_name}; number of chars: {num_chars_dataset_current}")
 
-    return num_chars_dataset
+    return num_chars_dataset_current
 
 
-def translate_eval(task_dict_items, target_lang="sr", project_id=None):
+def translate_eval(task_dict_items, target_lang="sr", project_id=None, char_limit=500000):
     assert project_id is not None, "Project ID must be specified"
     assert target_lang == "sr", "Only Serbian (Cyrillic) is supported for now"
 
@@ -257,28 +281,38 @@ def translate_eval(task_dict_items, target_lang="sr", project_id=None):
     out_dir = os.path.join(parent_dir_path, "serbian_eval")
     os.makedirs(out_dir, exist_ok=True)
 
+    debug_translate_fn = get_translate_fn(client, parent, target_lang, debug_mode=True)
     translate_fn = get_translate_fn(client, parent, target_lang)
 
     num_chars_total = 0
-    for task_name, task in task_dict_items:
-        if task.has_test_docs():
-            task_doc_func = task.test_docs
-        elif task.has_validation_docs():
-            task_doc_func = task.validation_docs
-        else:
-            raise RuntimeError("Task has neither test_docs nor validation_docs")
+    try:
+        for task_name, task in task_dict_items:
+            print('*' * 50)
+            print(f"Translating task: {task_name}")
+            print('*' * 50)
 
-        keys_of_interest = get_keys_of_interest(task_name)
-        first_level_keys = set([x.split('/')[0] for x in keys_of_interest])
-        second_level_keys = set([x.split('/')[1] for x in keys_of_interest if len(x.split('/')) > 1])
+            if task.has_test_docs():
+                task_doc_func = task.test_docs
+            elif task.has_validation_docs():
+                task_doc_func = task.validation_docs
+            else:
+                raise RuntimeError("Task has neither test_docs nor validation_docs")
 
-        task_docs = list(task_doc_func())
-        num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=True)
+            keys_of_interest = get_keys_of_interest(task_name)
+            first_level_keys = set([x.split('/')[0] for x in keys_of_interest])
+            second_level_keys = set([x.split('/')[1] for x in keys_of_interest if len(x.split('/')) > 1])
 
-        if task_name in ["nq_open", "triviaqa"]:
-            task_docs = list(task.training_docs())
-            num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=False)
+            task_docs = list(task_doc_func())
+            num_chars_pred_total = translate_dataset(task_name, debug_translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=True)
+            num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=True, start_num_chars=num_chars_total, end_num_chars=num_chars_total+num_chars_pred_total, char_limit=char_limit)
 
+            if task_name in ["nq_open", "triviaqa"]:
+                task_docs = list(task.training_docs())
+                num_chars_pred_total = translate_dataset(task_name, debug_translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=False)
+                num_chars_total += translate_dataset(task_name, translate_fn, first_level_keys, second_level_keys, task_docs, out_dir, is_test=False, start_num_chars=num_chars_total, end_num_chars=num_chars_total+num_chars_pred_total, char_limit=char_limit)
+    except Exception as e:  # char limit exceeded
+        print(e)
+        exit(0)
     print(f"Total number of chars: {num_chars_total}")
 
 
@@ -295,6 +329,7 @@ def evaluate(
     write_out=False,
     output_base_path=None,
     translation_project_id=None,
+    char_limit=500000,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -337,7 +372,7 @@ def evaluate(
         if (task.has_validation_docs() or task.has_test_docs())
     ]
 
-    translate_eval(task_dict_items, project_id=translation_project_id)
+    translate_eval(task_dict_items, project_id=translation_project_id, char_limit=char_limit)
     exit(0)
 
     results = collections.defaultdict(dict)
