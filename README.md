@@ -70,13 +70,16 @@ Finally run (note `model` and `model_args` are not important for us but we need 
 python main.py \
     --model hf \
     --model_args pretrained=mistralai/Mistral-7B-v0.1 \
-    --tasks hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq \
+    --tasks hellaswag \
     --translation_project_id <your project id>
     --char_limit 500000
+    --start_from_doc_index 0
 ```
 
 or open `main.py` and run using vscode debugger.
 
-Note: again please sync on Discord about which tasks you should help to translate! :)
-
+Note:
+* again please sync on Discord about which tasks you should help to translate! :)
+* select only one task at a time, posssible options: `hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq`
+* `start_from_doc_index` is used if you want to resume and translate a particular task only starting from a certain document index (useful in a collaborative setting where multiple people are translating different portions of the task)
 

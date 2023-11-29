@@ -12,6 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--translation_project_id", type=str, default=None, required=True)
     parser.add_argument("--char_limit", type=int, default=None, required=True)
+    parser.add_argument("--start_from_doc_index", type=int, default=None, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
     parser.add_argument(
@@ -61,6 +62,9 @@ def main():
     else:
         task_names = utils.pattern_match(args.tasks.split(","), tasks.ALL_TASKS)
 
+    if len(task_names) > 1:
+        raise ValueError("Please specify only one task can be specified at a time to avoid unexpected billing issues, and make sure you've set proper char limit.")
+
     print(f"Selected Tasks: {task_names}")
 
     description_dict = {}
@@ -85,6 +89,7 @@ def main():
         output_base_path=args.output_base_path,
         translation_project_id=args.translation_project_id,
         char_limit=args.char_limit,
+        start_from_doc_index=args.start_from_doc_index,
     )
 
     dumped = json.dumps(results, indent=2)
