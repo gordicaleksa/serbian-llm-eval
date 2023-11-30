@@ -1,10 +1,10 @@
 # Progress
 
-Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`
+Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`, `boolq`
 
-In progress: `boolq` (done from 0 to 1598, start from `--start_from_doc_index` equal to `1599`), `triviaqa` (see in open-hbs-llm channel on Discord)
+In progress: `hellaswag,triviaqa` (see in open-hbs-llm channel on Discord)
 
-Tasks todo: `hellaswag,nq_open`
+Tasks todo: `nq_open`
 
 (before setting a task sync with Aleksa first, see the rest of the README)
 
