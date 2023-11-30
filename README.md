@@ -25,10 +25,11 @@ First let's setup a minimal Python program that makes sure you can run Google Tr
 1. create a google console project (https://console.cloud.google.com/)
 2. enable google translation API -> to enable it you have to setup the billing and input your credit card details (a note regarding safety: you'll have 300$ of free credit (if this is the first time you're doing it) and no one can spend money from your credit card unless all those free credits are spent and you re-enable the billing again! if you already had it setup in that case you have 500.000 chars/month for free!)
 3. install `gcloud cli`  on your machine (see this: https://cloud.google.com/storage/docs/gsutil_install/)
-4. create conda env - if you don't have conda install miniconda, see this: https://docs.conda.io/projects/miniconda/en/latest/
-5. open a terminal (if on Windows type in `anaconda` in your search bar don't use `cmd`, if you're on Linux just use your terminal conda will already be in the PATH)
-6. run `conda create -n open_nllb python=3.10 -y`
-7. run `conda activate open_nllb` and then run  `pip install google-cloud-translate`
+4. create a credentials file with `gcloud auth application-default login`
+5. create conda env - if you don't have conda install miniconda, see this: https://docs.conda.io/projects/miniconda/en/latest/
+6. open a terminal (if on Windows type in `anaconda` in your search bar don't use `cmd`, if you're on Linux just use your terminal conda will already be in the PATH)
+7. run `conda create -n open_nllb python=3.10 -y`
+8. run `conda activate open_nllb` and then run  `pip install google-cloud-translate`
 
 That's it! After that just create a Python file with the following code and run it:
 
@@ -58,7 +59,7 @@ print(value_translated)
 Follow these instructions (see below for more details):
 1. Create a Python env for this project
 2. You'll find the program arguments are already specified inside `.vscode/launch.json`
-3. Change `project_id` to the google project id you got in the previous section
+3. Change `translation_project_id` to the google project id you got in the previous section
 4. Specify amount of characters you're willing to translate (500_000 is the usual free monthly limit)
 5. Run the `main.py`
 
@@ -92,4 +93,3 @@ Note:
 * again please sync on Discord about which tasks you should help to translate! :)
 * select only one task at a time, posssible options: `hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq`
 * `start_from_doc_index` is used if you want to resume and translate a particular task only starting from a certain document index (useful in a collaborative setting where multiple people are translating different portions of the task)
-
