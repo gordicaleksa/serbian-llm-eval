@@ -14,9 +14,9 @@
             "args": [
                 "--model", "hf",
                 "--model_args", "pretrained=mistralai/Mistral-7B-v0.1",
-                "--tasks", "arc_challenge",
                 "--translation_project_id", "ortus-391014",
-                "--char_limit", "10000",
+                "--tasks", "piqa",
+                "--char_limit", "500000",
                 "--start_from_doc_index", "0",
             ]
         }
