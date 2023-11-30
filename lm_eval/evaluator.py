@@ -275,7 +275,7 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                     else:
                         raise RuntimeError("Unexpected value type in doc")
 
-                if not is_debug:
+                if not exit_flag and not is_debug:
                     progress_bar.update(num_chars_dataset_current - num_chars_dataset_old)
 
                 if not exit_flag and not is_debug:
