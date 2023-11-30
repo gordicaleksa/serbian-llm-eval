@@ -206,8 +206,13 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
     is_debug = start_num_chars is None or end_num_chars is None
     try:
         with open(out_path, 'w', encoding="utf-8") as f:
-            progress_bar = tqdm(all_docs, total=end_num_chars-start_num_chars, initial=start_num_chars) if start_num_chars is not None and end_num_chars is not None else all_docs
-            for doc_index, doc in enumerate(progress_bar):
+
+            if not is_debug:
+                progress_bar = tqdm(all_docs, total=end_num_chars-start_num_chars, initial=start_num_chars)
+
+            for doc_index, doc in enumerate(all_docs):
+
+                num_chars_dataset_old = num_chars_dataset_current
 
                 if start_from_doc_index is not None and doc_index < start_from_doc_index:
                     continue
@@ -270,6 +275,9 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                     else:
                         raise RuntimeError("Unexpected value type in doc")
 
+                if not is_debug:
+                    progress_bar.update(num_chars_dataset_current - num_chars_dataset_old)
+
                 if not exit_flag and not is_debug:
                     f.write(json.dumps(translated_doc, ensure_ascii=False) + "\n")  # write the translated doc to file
                     f.flush()
@@ -279,9 +287,13 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
     except Exception as e:  # char limit exceeded
         # Rename output file to indicate that it is incomplete and add doc_id, after that raise again
         print(e)
-        new_filename = f'{task_name}{"_test" if is_test else "_train"}_incomplete_{start_from_doc_index}_{doc_index-2}.jsonl'
+        new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{doc_index-2}.jsonl'
         os.rename(out_path, os.path.join(out_dir, new_filename))
         raise e
+
+    if not is_debug:
+        new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{len(all_docs) - 1}_end.jsonl'
+        os.rename(out_path, os.path.join(out_dir, new_filename))
 
     return num_chars_dataset_current
 
