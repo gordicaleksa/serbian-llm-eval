@@ -279,7 +279,7 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
     except Exception as e:  # char limit exceeded
         # Rename output file to indicate that it is incomplete and add doc_id, after that raise again
         print(e)
-        new_filename = f'{task_name}{"_test" if is_test else "_train"}_incomplete_{start_from_doc_index}_{doc_index-1}.jsonl'
+        new_filename = f'{task_name}{"_test" if is_test else "_train"}_incomplete_{start_from_doc_index}_{doc_index-2}.jsonl'
         os.rename(out_path, os.path.join(out_dir, new_filename))
         raise e
 
