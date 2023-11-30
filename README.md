@@ -1,10 +1,12 @@
 # Progress
 
-Tasks that are already translated:
-* `arc_easy`, `arc_challenge`
+Done: `arc_easy`, `arc_challenge`, `openbookqa`
 
-Tasks todo:
-* `hellaswag,winogrande,piqa,openbookqa,nq_open,triviaqa,boolq` (sync with Aleksa first, see the rest of the README)
+In progress: `piqa`
+
+Tasks todo: `hellaswag,winogrande,nq_open,triviaqa,boolq`
+
+(before setting a task sync with Aleksa first, see the rest of the README)
 
 # IMPORTANT
 
