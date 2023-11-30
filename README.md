@@ -1,3 +1,11 @@
+# Progress
+
+Tasks that are already translated:
+* `arc_easy`, `arc_challenge`
+
+Tasks todo:
+* `hellaswag,winogrande,piqa,openbookqa,nq_open,triviaqa,boolq` (sync with Aleksa first, see the rest of the README)
+
 # IMPORTANT
 
 * running this this will eat your google cloud credits or will bill you if you're already in a bill mode (this happens after you spend free credits and then deliberately enable billing again).
