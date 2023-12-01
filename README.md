@@ -1,8 +1,8 @@
 # Progress
 
-Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`, `boolq`
+Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`, `boolq`, `hellaswag`
 
-In progress: `hellaswag,triviaqa` (see in open-hbs-llm channel on Discord)
+In progress: `triviaqa` (see in open-hbs-llm channel on Discord)
 
 Tasks todo: `nq_open`
 
