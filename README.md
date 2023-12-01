@@ -2,9 +2,9 @@
 
 Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`, `boolq`, `hellaswag`
 
-In progress: `triviaqa` (see in open-hbs-llm channel on Discord)
+In progress: `triviaqa`, `nq_open` (see in open-hbs-llm channel on Discord)
 
-Tasks todo: `nq_open`
+todo: <empty> :)
 
 (before setting a task sync with Aleksa first, see the rest of the README)
 
