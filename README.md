@@ -18,20 +18,81 @@ Tasks todo: `nq_open`
 
 * only translate a subset of the above tasks, sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm channel.
 
+# Prerequisites
+
+Before you begin, ensure you meet the following requirements:
+
+**For Linux Users:**
+
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/)
+
+**For Windows Users:**
+1. Windows Subsystem for Linux [(WSL2)](https://learn.microsoft.com/en-us/windows/wsl/install). If you don't have WSL2 installed, follow these steps in Windows cmd/powershell in administrator mode:
+
+    ```bash
+    wsl --install
+
+   // Check version and distribution name.
+   wsl -l -v       
+
+    // Set the newly downloaded linux distro as default.
+    wsl --set-default <distribution name>
+    ```
+2. Install [Git](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-git) from the WSL terminal.
+
+    ```bash
+    sudo apt update
+    sudo apt install git
+    git --version
+    ```
+3. Install [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) from the WSL terminal.
+    ```bash
+    mkdir -p ~/miniconda3
+
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+
+    rm -rf ~/miniconda3/miniconda.sh
+
+    // Initialize conda with bash.
+    ~/miniconda3/bin/conda init bash
+    ```
+
+4. Follow the instructions below on WSL.
+
 # Instructions for translating lm harness eval from English into Serbian
 
 First let's setup a minimal Python program that makes sure you can run Google Translate on your local machine.
 
-1. create a google console project (https://console.cloud.google.com/)
-2. enable google translation API -> to enable it you have to setup the billing and input your credit card details (a note regarding safety: you'll have 300$ of free credit (if this is the first time you're doing it) and no one can spend money from your credit card unless all those free credits are spent and you re-enable the billing again! if you already had it setup in that case you have 500.000 chars/month for free!)
-3. install `gcloud cli`  on your machine (see this: https://cloud.google.com/storage/docs/gsutil_install/)
-4. create a credentials file with `gcloud auth application-default login`
-5. create conda env - if you don't have conda install miniconda, see this: https://docs.conda.io/projects/miniconda/en/latest/
-6. open a terminal (if on Windows type in `anaconda` in your search bar don't use `cmd`, if you're on Linux just use your terminal conda will already be in the PATH)
-7. run `conda create -n open_nllb python=3.10 -y`
-8. run `conda activate open_nllb` and then run  `pip install google-cloud-translate`
+1. Create a Google Console project (https://console.cloud.google.com/)
+2. Enable Google Translation API -> to enable it you have to setup the billing and input your credit card details (a note regarding safety: you'll have 300$ of free credit (if this is the first time you're doing it) and no one can spend money from your credit card unless all those free credits are spent and you re-enable the billing again! if you already had it setup in that case you have 500.000 chars/month for free!)
+3. Install Google Cloud CLI (gsutil) on your machine (see this: https://cloud.google.com/storage/docs/gsutil_install/)
+    
+    a.) Download the Linux archive file (find latest version from link above)
 
-That's it! After that just create a Python file with the following code and run it:
+     `curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-455.0.0-linux-x86_64.tar.gz`
+
+    b.) Extract the contents from the archive file above.
+
+    `tar -xf google-cloud-cli-455.0.0-linux-x86_64.tar.gz`
+
+    c.) Run installation script. `./google-cloud-sdk/install.sh`
+
+    d.) Initiate and authenticate your account. `./google-cloud-sdk/bin/gcloud init`
+    
+    e.) Create a credentials file with `gcloud auth application-default login`
+4. Create and setting up the conda env
+    
+    a.) Open a terminal (if on Windows use the `WSL` terminal, if you're on Linux just use your terminal conda will already be in the PATH)
+    
+    b.) Run `conda create -n open_nllb python=3.10 -y`
+
+    c.) Run `conda activate open_nllb` 
+    
+    d.) Run  `pip install google-cloud-translate`
+
+That's it! After that just create a `test.py` Python file with the following code and run with `Run and Debug` option in VS code after creating the launch.json file:
 
 ```Python
 from google.cloud import translate
@@ -69,7 +130,7 @@ You can reuse the above conda env `open-nllb`, additionally do the following:
 
 ```
 git clone https://github.com/gordicaleksa/lm-evaluation-harness-serbian
-cd lm-evaluation-harness
+cd lm-evaluation-harness-serbian
 pip install -e .
 ```
 
