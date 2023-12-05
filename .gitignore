@@ -5,3 +5,6 @@ lm_cache
 .idea
 
 *.egg-info/
+.vscode/
+serbian_eval/translated/*
+serbian_eval/transliterated/*

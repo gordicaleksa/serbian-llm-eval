@@ -1,24 +1,62 @@
-# Progress
+# Serbian LLM eval
 
-Done: `arc_easy`, `arc_challenge`, `openbookqa`, `winogrande`, `piqa`, `boolq`, `hellaswag`
+Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Montenegrin). Also see the [future work](#future-work) section below.
 
-In progress: `triviaqa`, `nq_open` (see in open-hbs-llm channel on Discord)
+## What is currently covered:
+* Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
+* World knowledge: `NaturalQuestions`, `TriviaQA`
+* Reading comprehension: `BoolQ`
 
-todo: <empty> :)
+The motivation for picking these specific tasks:
+* these tasks are supported by EleutherAI's [lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) project (this project is a fork that was tweaked for purposes of creating the Serbian eval data)
+* these tasks were used by the recent [Mistral 7B LLM paper](https://arxiv.org/abs/2310.06825).
+* I found the intersection and left out a subset of the tasks as the future todos.
 
-(before setting a task sync with Aleksa first, see the rest of the README)
+## Future work:
+* Manual verification effort (watch out my [Discord server](https://discord.gg/peBrCpheKE) for a datathon announcement that'll happen in few days)
+* Automated verification effort via GPT-4.
+* Make it easy to run Serbian evals through this fork (coming over the next few days as soon as I start running it with [yugoGPT](https://www.linkedin.com/feed/update/urn:li:activity:7133414124553711616/), right now the data is under `serbian_eval` directory)
+* Related to above - create a dataset card for [HuggingFace dataset](https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval)
+* Popular aggregated results: `MMLU`, `BBH`, `AGI Eval`
+* Math: `GSM8K`, `MATH`
+* Explicit support for other HBS languages.
 
-# IMPORTANT
 
-* running this this will eat your google cloud credits or will bill you if you're already in a bill mode (this happens after you spend free credits and then deliberately enable billing again).
+Please email me at gordicaleksa at gmail com in case you're willing to sponsor the automated GPT-4 effort. You will get the credits and eternal glory. :)
+
+In Serbian:
+```
+I na srpskom, ukoliko ste voljni da finansijski podržite ovaj poduhvat korišćenja ChatGPT da se dobiju kvalitetniji podaci, i koji je od nacionalnog/regionalnog interesa, moj email je gordicaleksa at gmail com. Dobićete priznanje na ovom projektu da ste sponzor (i postaćete deo istorije). :)
+
+Dalje ovaj projekat će pomoći da se pokrene lokalni large language model ekoksistem.
+``````
+
+## How was the eval created:
+1) Google translate into Serbian (code `sr`) - see the rationale below*
+2) Transliteration from Cyrillic script into Latin script (lossless 1-1 mapping) using `cyrtranslit` package.
+3) Manual verification (a datathon will be organized over the next few days)
+
+*Earlier this summer (2023) I've done side by side comparisons of various translation systems (GPT-3.5, GPT-4, NLLB, etc.) and according to Flores 200 benchmarks Google Translate turned out to be the best option. Note that DeepL doesn't even support Serbian language.
+
+Other benchmarks for Serbian:
+
+- https://github.com/facebookresearch/belebele
+- COPA: https://github.com/clarinsi/benchich/tree/main/copa
+
+
+# Creating the eval - instructions
+
+## IMPORTANT
+
+* running this this will eat your google cloud credits or will bill you if you're already in the billing mode (this happens after you spend free credits and then deliberately enable billing again).
 
 * you can use your free credits to translate 500.000 chars / month!
 
 * if this is the first time you're creating a gcloud project you'll have 300$ of free credits!
 
-* only translate a subset of the above tasks, sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm channel.
+* sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm channel on which tasks to tackle next.
 
-# Prerequisites
+## Prerequisites
 
 Before you begin, ensure you meet the following requirements:
 
@@ -61,7 +99,7 @@ Before you begin, ensure you meet the following requirements:
 
 4. Follow the instructions below on WSL.
 
-# Instructions for translating lm harness eval from English into Serbian
+## Instructions for translating lm harness eval from English into Serbian
 
 First let's setup a minimal Python program that makes sure you can run Google Translate on your local machine.
 
@@ -124,7 +162,7 @@ Follow these instructions (see below for more details):
 4. Specify amount of characters you're willing to translate (500_000 is the usual free monthly limit)
 5. Run the `main.py`
 
-### Create Python environment
+## Create Python environment
 
 You can reuse the above conda env `open-nllb`, additionally do the following:
 
@@ -134,7 +172,7 @@ cd lm-evaluation-harness-serbian
 pip install -e .
 ```
 
-### Run translation
+## Run translation
 
 Finally run (note `model` and `model_args` are not important for us but we need to specify them):
 
@@ -154,3 +192,23 @@ Note:
 * again please sync on Discord about which tasks you should help to translate! :)
 * select only one task at a time, posssible options: `hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq`
 * `start_from_doc_index` is used if you want to resume and translate a particular task only starting from a certain document index (useful in a collaborative setting where multiple people are translating different portions of the task)
+
+
+## Run transliteration
+
+1. Update your env by running `pip install cyrtranslit`
+2. Run the `transliterate_cyrillic_to_latin.py` script
+
+
+# Credits
+
+A huge thank you to the following contributors who selflessly went through the steps above and helped create this project of immense value:
+* [Vera Prohaska](https://vtwoptwo.com/)
+* [Chu Kin Chan](www.linkedin.com/in/roy-ck-chan)
+* @miscguy - Discord handle
+* [Toby Farmer](https://www.linkedin.com/in/tobyfarmer/)
+* [Malvi Bid](https://www.linkedin.com/in/malvibid/)
+* [Raphael Vienne](https://www.linkedin.com/in/raphael-vienne/)
+* [Nenad Aksentijevic](https://www.linkedin.com/in/nenad-aksentijevic-21629a1b6)
+* [Isaac Nicolas](https://www.linkedin.com/in/isaacnicolas/)
+* [Brian Pulfer](https://www.brianpulfer.ch/)
