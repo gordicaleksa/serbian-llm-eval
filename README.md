@@ -205,7 +205,7 @@ Note:
 A huge thank you to the following contributors who selflessly went through the steps above and helped create this project of immense value:
 * [Vera Prohaska](https://vtwoptwo.com/)
 * [Chu Kin Chan](www.linkedin.com/in/roy-ck-chan)
-* @miscguy - Discord handle
+* [Joe Makepeace](https://www.linkedin.com/in/joe-makepeace-a872a1183/)
 * [Toby Farmer](https://www.linkedin.com/in/tobyfarmer/)
 * [Malvi Bid](https://www.linkedin.com/in/malvibid/)
 * [Raphael Vienne](https://www.linkedin.com/in/raphael-vienne/)
