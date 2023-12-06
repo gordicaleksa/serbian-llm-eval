@@ -2,6 +2,13 @@
 
 Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Montenegrin). Also see the [future work](#future-work) section below.
 
+## Sponsors
+
+Thanks to all of our sponsor(s) for donating for the Serbian/HBS LLM & eval projects.
+
+Individuals:
+* [Luka Važić](https://www.linkedin.com/in/vazic/) - Software Engineer at Google
+
 ## What is currently covered:
 * Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
 * World knowledge: `NaturalQuestions`, `TriviaQA`
