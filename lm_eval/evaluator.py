@@ -10,6 +10,8 @@ from lm_eval.utils import positional_deprecated, run_task_tests
 from lm_eval.models.gpt2 import HFLM
 
 import numpy as np
+import openai
+from openai import OpenAI
 import transformers
 
 import json
@@ -346,6 +348,104 @@ def translate_eval(task_dict_items, target_lang="sr", project_id=None, char_limi
     print(f"Total number of chars: {num_chars_total}")
 
 
+def get_prompt_template(prompt_templates_dir, task_name):
+    path = os.path.join(prompt_templates_dir, f"{task_name}.txt")
+    with open(path) as infile:
+        template = infile.read()
+
+    return template
+
+
+def refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir):
+    template = get_prompt_template(prompt_templates_dir, task_name)
+    for doc_index, (doc_eng, doc_srp) in enumerate(zip(task_docs, task_docs_serbian)):
+         if task_name == "arc_easy":
+            qe = doc_eng["query"]
+            qs = doc_srp["query"]
+            ce = doc_eng["choices"]
+            cs = doc_srp["choices"]
+            prompt = template.format(src_query=qe, src_choices=ce, trg_query=qs, trg_choices=cs)
+            response = openai.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                        {"role": "system", "content": "You are a professional translator. You specialize in translating from English to Serbian."},
+                        {"role": "user", "content": prompt},
+                    ],
+                temperature=1.0,
+                top_p=1.0,
+                presence_penalty=0.0,
+                frequency_penalty=0.0
+            )
+
+            if not response.choices[0].finish_reason == 'stop':
+                raise Exception(f'Result is too long - retrying.')
+
+            result = response.choices[0].message.content
+            print(result)
+
+    print('ok')
+
+
+def get_serbian_docs(in_dir, task_name, is_train=False):
+    suffix = "_train" if is_train else "_test"
+    matches = [filename for filename in os.listdir(in_dir) if filename.startswith(f'{task_name}{suffix}')]
+    assert len(matches) == 1, f"Expected exactly one match for {task_name}, but found {matches}"
+    filename = matches[0]
+    file_path = os.path.join(in_dir, filename)
+    with open(file_path, 'r') as f:
+        task_docs_serbian = []
+        for line in f:
+            task_docs_serbian.append(json.loads(line))
+
+    return task_docs_serbian
+
+
+def refine_eval(task_dict_items, start_from_doc_index=None):
+
+    this_file_path = os.path.dirname(os.path.realpath(__file__))
+    parent_dir_path = os.path.abspath(os.path.join(this_file_path, os.pardir))
+    out_dir = os.path.join(parent_dir_path, "serbian_eval", "refined")
+    in_dir = os.path.join(parent_dir_path, "serbian_eval", "transliterated")
+    prompt_templates_dir = os.path.join(parent_dir_path, "serbian_eval", "prompts")
+    os.makedirs(out_dir, exist_ok=True)
+
+    try:
+        for task_name, task in task_dict_items:
+            print('*' * 50)
+            print(f"Translating task: {task_name}")
+            print('*' * 50)
+
+            if task.has_test_docs():
+                task_doc_func = task.test_docs
+            elif task.has_validation_docs():
+                task_doc_func = task.validation_docs
+            else:
+                raise RuntimeError("Task has neither test_docs nor validation_docs")
+
+            # keys_of_interest = get_keys_of_interest(task_name)
+            # first_level_keys = set([x.split('/')[0] for x in keys_of_interest])
+            # second_level_keys = set([x.split('/')[1] for x in keys_of_interest if len(x.split('/')) > 1])
+
+            task_docs_serbian = get_serbian_docs(in_dir, task_name, is_train=False)
+            task_docs = list(task_doc_func())
+            assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
+
+            refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir)
+
+            if task_name in ["nq_open", "triviaqa"]:
+                task_docs_serbian = get_serbian_docs(in_dir, task_name, is_train=True)
+                task_docs = list(task.training_docs())
+                assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
+
+                refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir)
+
+    except Exception as e:
+        print(e)
+        exit(0)
+
+    print(f'Ok, done!')
+
+
 @positional_deprecated
 def evaluate(
     lm,
@@ -403,7 +503,8 @@ def evaluate(
         if (task.has_validation_docs() or task.has_test_docs())
     ]
 
-    translate_eval(task_dict_items, project_id=translation_project_id, char_limit=char_limit, start_from_doc_index=start_from_doc_index)
+    # translate_eval(task_dict_items, project_id=translation_project_id, char_limit=char_limit, start_from_doc_index=start_from_doc_index)
+    refine_eval(task_dict_items, start_from_doc_index=start_from_doc_index)
     exit(0)
 
     results = collections.defaultdict(dict)

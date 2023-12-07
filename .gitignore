@@ -8,3 +8,4 @@ lm_cache
 .vscode/
 serbian_eval/translated/*
 serbian_eval/transliterated/*
+.env
