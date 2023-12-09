@@ -1,0 +1,40 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+Make sure you first reason before outputting the final Serbian translation. During your reasoning process append each of the 4 choices to the original query and make sure it fits perfectly according to Serbian grammar. Translations need to be fluent.
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"query": refined query goes here
+"choice1": refined choice 1 goes here
+"choice2": refined choice 2 goes here
+"choice3": refined choice 3 goes here
+"choice4": refined choice 4 goes here
+
+Note: query and choices are obviously related so do use the information in "query" to help you translate "choice1"/"choice2"/"choice3"/"choice4" and vice versa.
+You must be able to append any of the 4 choices and get a cohesive, naturally sounding sentence.
+
+Remember: All output text should be in Serbian except that "REASONING", "SERBIAN", "query", "choice1", "choice2", "choice3", "choice4" are special tokens that must not be translated.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+
+ENGLISH:
+"query": {src_query}
+"choice1": {src_choice1}
+"choice2": {src_choice2}
+"choice3": {src_choice3}
+"choice4": {src_choice4}
+
+SERBIAN (GOOGLE TRANSLATE):
+"query": {trg_query}
+"choice1": {trg_choice1}
+"choice2": {trg_choice2}
+"choice3": {trg_choice3}
+"choice4": {trg_choice4}

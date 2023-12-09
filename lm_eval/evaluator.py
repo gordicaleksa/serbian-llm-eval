@@ -411,7 +411,49 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                 old_doc_srp = doc_srp.copy()  # create a copy of the doc
 
-                if task_name in ["hellaswag"]:
+                if task_name in ["piqa"]:
+                    # Eval method: loglikelihood of choices (this is similar to all those that were in the format question + answer, arc etc.)
+                    src_goal = doc_eng["goal"]
+                    src_choices = doc_eng["choices"]
+                    trg_goal = doc_srp["goal"]
+                    trg_choices = doc_srp["choices"]
+                    assert len(src_choices) == len(trg_choices) == 2, f"Expected same number of choices, but found {len(src_choices)} and {len(trg_choices)}"
+                    prompt = template.format(
+                        src_goal=src_goal,
+                        src_choice1=src_choices[0],
+                        src_choice2=src_choices[1],
+                        trg_goal=trg_goal,
+                        trg_choice1=trg_choices[0],
+                        trg_choice2=trg_choices[1]
+                    )
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"goal\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, goal, choice1, choice2 = matches[0]
+
+                        doc_srp["goal"] = goal
+                        doc_srp["choices"] = [choice1, choice2]
+                        break
+                elif task_name in ["hellaswag", "openbookqa", "triviaqa"]:
                     # Eval method: loglikelihood of choices
                     src_query = doc_eng["query"]
                     src_choices = doc_eng["choices"]

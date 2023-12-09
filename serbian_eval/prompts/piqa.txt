@@ -1,0 +1,34 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+Make sure you first reason before outputting the final Serbian translation.
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"goal": refined goal goes here
+"choice1": refined choice 1 goes here
+"choice2": refined choice 2 goes here
+
+Note: goal and choices are obviously related so do use the information in "goal" to help you translate "choice1"/"choice2" and vice versa.
+The "goal" together with "choice1" or "choice2" should form a cohesive, naturally sounding text.
+
+Remember: All output text should be in Serbian except that "REASONING", "SERBIAN", "query", "choice1", "choice2" are special tokens that must not be translated.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+
+ENGLISH:
+"goal": {src_goal}
+"choice1": {src_choice1}
+"choice2": {src_choice2}
+
+SERBIAN (GOOGLE TRANSLATE):
+"goal": {trg_goal}
+"choice1": {trg_choice1}
+"choice2": {trg_choice2}
