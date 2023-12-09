@@ -4,7 +4,10 @@ Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Mon
 
 ## Sponsors
 
-Thanks to all of our sponsor(s) for donating for the Serbian/HBS LLM & eval projects.
+Thanks to all of our sponsor(s) for donating for the yugoGPT & eval projects.
+
+yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
+Eval is continuously being worked on - currently using GPT-4 to refine it automatically plus using manual verification/editing.
 
 Companies:
 * [psk.rs](https://psk.rs/)
