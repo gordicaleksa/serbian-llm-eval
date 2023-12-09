@@ -395,6 +395,13 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
     progress_bar = tqdm(task_docs, total=len(task_docs), initial=start_from_doc_index)
 
+    api_params = {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0
+    }
+
     try:
         with open(out_path, 'w', encoding="utf-8") as f, open(out_path_human_readable, 'w', encoding="utf-8") as f_human_readable:
             for doc_index, (doc_eng, doc_srp) in enumerate(zip(task_docs, task_docs_serbian)):
@@ -404,7 +411,53 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                 old_doc_srp = doc_srp.copy()  # create a copy of the doc
 
-                if task_name in ["winogrande"]:
+                if task_name in ["hellaswag"]:
+                    # Eval method: loglikelihood of choices
+                    src_query = doc_eng["query"]
+                    src_choices = doc_eng["choices"]
+                    trg_query = doc_srp["query"]
+                    trg_choices = doc_srp["choices"]
+                    assert len(src_choices) == len(trg_choices) == 4, f"Expected same number of choices, but found {len(src_choices)} and {len(trg_choices)}"
+                    prompt = template.format(
+                        src_query=src_query,
+                        src_choice1=src_choices[0],
+                        src_choice2=src_choices[1],
+                        src_choice3=src_choices[2],
+                        src_choice4=src_choices[3],
+                        trg_query=trg_query,
+                        trg_choice1=trg_choices[0],
+                        trg_choice2=trg_choices[1],
+                        trg_choice3=trg_choices[2],
+                        trg_choice4=trg_choices[3],
+                    )
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"query\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\n\s*\"choice3\":\s*(.*?)\n\s*\"choice4\":\s*(.*?)\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, query, choice1, choice2, choice3, choice4 = matches[0]
+
+                        doc_srp["query"] = query
+                        doc_srp["choices"] = [choice1, choice2, choice3, choice4]
+                        break
+                elif task_name in ["winogrande"]:
                     # Eval method: plugin option 1 and 2 where the "_" is  and do loglikelihood of everything right of the "_"
                     src_sentence = doc_eng["sentence"]
                     src_option1 = doc_eng["option1"]
@@ -420,13 +473,6 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                         trg_option1=trg_option1,
                         trg_option2=trg_option2
                     )
-
-                    api_params = {
-                        "temperature": 1.0,
-                        "top_p": 1.0,
-                        "presence_penalty": 0.0,
-                        "frequency_penalty": 0.0
-                    }
 
                     num_attempts = NUM_ATTEMPTS_GPT4
                     while num_attempts > 0:
@@ -476,13 +522,6 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                         trg_question=trg_question
                     )
 
-                    api_params = {
-                        "temperature": 1.0,
-                        "top_p": 1.0,
-                        "presence_penalty": 0.0,
-                        "frequency_penalty": 0.0
-                    }
-
                     num_attempts = NUM_ATTEMPTS_GPT4
 
                     while num_attempts > 0:
@@ -517,13 +556,6 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     ce = doc_eng["choices"]
                     cs = doc_srp["choices"]
                     prompt = template.format(src_question=qe, src_answer=ce, trg_question=qs, trg_answer=cs)
-
-                    api_params = {
-                        "temperature": 1.0,
-                        "top_p": 1.0,
-                        "presence_penalty": 0.0,
-                        "frequency_penalty": 0.0
-                    }
 
                     num_attempts = NUM_ATTEMPTS_GPT4
 
@@ -569,13 +601,6 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     src_a = str(doc_eng["answer"])
                     trg_a = str(doc_srp["answer"])
                     prompt = template.format(src_question=src_q, src_answer=src_a, trg_question=trg_q, trg_answer=trg_a)
-
-                    api_params = {
-                        "temperature": 1.0,
-                        "top_p": 1.0,
-                        "presence_penalty": 0.0,
-                        "frequency_penalty": 0.0
-                    }
 
                     num_attempts = NUM_ATTEMPTS_GPT4
 
