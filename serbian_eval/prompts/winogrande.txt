@@ -1,0 +1,38 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+It also erroneously removes the "_" symbol that is vital because these sentences are from Winogrande evaluation task.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+Make sure you first reason before outputting the final Serbian translation. During your reasoning process insert both options into the original sentence and make sure it fits perfectly according to Serbian grammar.
+
+Make sure never to remove the "_". And if "_" is missing you need to reinsert it back using the English translation to understand where to insert it.
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"sentence": refined sentence goes here
+"option1": refined option 1 goes here
+"option2": refined option 2 goes here
+
+Note: sentence and options are obviously related so do use the information in "sentence" to help you translate "option1"/"option2" and vice versa.
+You must be able to replace the "_" with "option1" or "option2" and get a cohesive, naturally sounding sentence.
+
+Remember: All output text should be in Serbian except that "REASONING", "SERBIAN", "sentence", "option1", "option2" are special tokens that must not be translated.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+
+ENGLISH:
+"sentence": {src_sentence}
+"option1": {src_option1}
+"option2": {src_option2}
+
+SERBIAN (GOOGLE TRANSLATE):
+"sentence": {trg_sentence}
+"option1": {trg_option1}
+"option2": {trg_option2}

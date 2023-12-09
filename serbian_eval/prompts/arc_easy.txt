@@ -1,0 +1,78 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+EXAMPLES:
+
+ENGLISH:
+"question": who is the girl in green day 21 guns
+"answer": ['Lisa Stelly', 'Rihanna', 'Nicki Minaj', 'Judy Garland']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": ko je devojka u zelenom dejstvu 21 oružje
+"answer": ['Lisa Steli', 'Rijana', 'Niki Minaž, 'Džudi Garland']
+
+REASONING:
+* This translation is not correct because it took the name of the band "Green Day" and translated it into Serbian "zelenom dejstvu" instead of just keeping the original English name.
+* Similarly for 21 guns, that's the name of the song so it should not be translated into "21 oružje".
+* Finally albeit this is a fine detail the "answer" should likely be "Liza Steli" and not "Lisa Steli" as that's how the name is pronounced in Serbian.
+SERBIAN:
+"question": Ko je devojka u pesmi "21 guns" grupe Green Day?
+"answer": ['Liza Steli', 'Rijana', 'Niki Minaž, 'Džudi Garland']
+
+ENGLISH:
+"question": when was the last time anyone was on the moon
+"answer": ['14 December 1972 UTC', 'December 1972', '13-th of August 1969', 'yesterday']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": kada je neko poslednji put bio na Mesecu
+"answer": ['14. decembar 1972. UTC', 'decembra 1972. godine', 'trinaestog avgust 1969', 'juce']
+
+REASONING:
+* 'trinaestog avgust' is not a good declension it should be 'trinaestog avgusta'
+* 'juce' is misspelled and should use the Latin letter č, i.e. juče instead of juce
+SERBIAN:
+"question": kada je neko poslednji put bio na Mesecu
+"answer": ['14. decembar 1972. UTC', 'decembra 1972. godine', 'trinaestog avgusta 1969', 'juče']
+
+ENGLISH:
+"question": Question: Centuries ago, people used their knowledge of the stars to\nAnswer:
+"answer": ['navigate ships.', 'study the weather.', 'predict volcanic eruptions.', 'map the Earth's surface.']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": Pitanje: Pre nekoliko vekova ljudi su koristili svoje znanje o zvezdama\nOdgovor:
+"answer": ['ploviti brodovima.', 'proučavati vremenske prilike.', 'predviđaju vulkanske erupcije.', 'mapirati površinu Zemlje.']
+
+REASONING:
+* The question was not translated properly, the suffix "kako bi" needs to be added so that the "question" and "answer" sound naturally.
+* Additionally one needs to modify the "answer" such that we restore the narrative flow of the sentence. Use "plovili" instead of "ploviti", etc.
+SERBIAN:
+"question": Pitanje: Pre nekoliko vekova ljudi su koristili svoje znanje o zvezdama kako bi\nOdgovor:
+"answer": ['plovili brodovima.', 'proučavali vremenske prilike.', 'predviđali vulkanske erupcije.', 'mapirali površinu Zemlje.']
+
+Make sure you first reason before outputting the final Serbian translation. Be even more verbose and thorough than in the above examples.
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"question": refined translation goes here
+"answer": ['refined answer 1', 'refined answer 2', 'refined answer 3', 'refined answer 4']
+
+Note: question and answer are obviously related so do use the information in "question" to help you translate "answer" and vice versa.
+
+Remember: All output text should be in Serbian with some exceptions as shown in the example above. "REASONING", "SERBIAN", "question", "answer" are special tokens that must not be translated.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+
+ENGLISH:
+"question": {src_question}
+"answer": {src_answer}
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": {trg_question}
+"answer": {trg_answer}

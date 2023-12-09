@@ -1,6 +1,8 @@
+import asyncio
 import collections
 import itertools
 import random
+import re
 
 import lm_eval.metrics
 import lm_eval.models
@@ -18,6 +20,7 @@ import json
 import os
 from google.cloud import translate
 from tqdm import tqdm
+from lm_eval.openai_handler import OpenAIHandler
 
 @positional_deprecated
 def simple_evaluate(
@@ -356,38 +359,287 @@ def get_prompt_template(prompt_templates_dir, task_name):
     return template
 
 
-def refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir):
+def save_human_readable(f_human_readable, reasoning, doc_eng, old_doc_srp, doc_srp, doc_index):
+    doc_eng_str = json.dumps(doc_eng, indent=4, ensure_ascii=False)
+    doc_srp_str = json.dumps(doc_srp, indent=4, ensure_ascii=False)
+    old_doc_srp_str = json.dumps(old_doc_srp, indent=4, ensure_ascii=False)
+
+    f_human_readable.write('*' * 50)
+    f_human_readable.write("\n")
+    f_human_readable.write(f"{doc_index}. original doc (English):\n")
+    f_human_readable.write(doc_eng_str)
+    f_human_readable.write("\n\n")
+    f_human_readable.write(f"Google Translate (Serbian):\n")
+    f_human_readable.write(old_doc_srp_str)
+    f_human_readable.write("\n\n")
+    f_human_readable.write(f"GPT-4 reasoning:\n")
+    f_human_readable.write(reasoning)
+    f_human_readable.write("\n\n")
+    f_human_readable.write(f"Translated doc (Serbian):\n")
+    f_human_readable.write(doc_srp_str)
+    f_human_readable.write("\n")
+    f_human_readable.write('*' * 50)
+    f_human_readable.write("\n\n")
+    f_human_readable.flush()
+
+
+async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test, start_from_doc_index=None):
     template = get_prompt_template(prompt_templates_dir, task_name)
-    for doc_index, (doc_eng, doc_srp) in enumerate(zip(task_docs, task_docs_serbian)):
-         if task_name == "arc_easy":
-            qe = doc_eng["query"]
-            qs = doc_srp["query"]
-            ce = doc_eng["choices"]
-            cs = doc_srp["choices"]
-            prompt = template.format(src_query=qe, src_choices=ce, trg_query=qs, trg_choices=cs)
-            response = openai.chat.completions.create(
-                model="gpt-4",
-                messages=[
-                        {"role": "system", "content": "You are a professional translator. You specialize in translating from English to Serbian."},
-                        {"role": "user", "content": prompt},
-                    ],
-                temperature=1.0,
-                top_p=1.0,
-                presence_penalty=0.0,
-                frequency_penalty=0.0
-            )
 
-            if not response.choices[0].finish_reason == 'stop':
-                raise Exception(f'Result is too long - retrying.')
+    NUM_ATTEMPTS_GPT4 = 3
 
-            result = response.choices[0].message.content
-            print(result)
+    out_filename = f'{task_name}{"_test" if is_test else "_train"}.jsonl'
+    out_path = os.path.join(out_dir, out_filename)
+    out_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable.jsonl'
+    out_path_human_readable = os.path.join(out_dir, out_filename_human_readable)
 
-    print('ok')
+    progress_bar = tqdm(task_docs, total=len(task_docs), initial=start_from_doc_index)
+
+    try:
+        with open(out_path, 'w', encoding="utf-8") as f, open(out_path_human_readable, 'w', encoding="utf-8") as f_human_readable:
+            for doc_index, (doc_eng, doc_srp) in enumerate(zip(task_docs, task_docs_serbian)):
+
+                if start_from_doc_index is not None and doc_index < start_from_doc_index:
+                    continue
+
+                old_doc_srp = doc_srp.copy()  # create a copy of the doc
+
+                if task_name in ["winogrande"]:
+                    # Eval method: plugin option 1 and 2 where the "_" is  and do loglikelihood of everything right of the "_"
+                    src_sentence = doc_eng["sentence"]
+                    src_option1 = doc_eng["option1"]
+                    src_option2 = doc_eng["option2"]
+                    trg_sentence = doc_srp["sentence"]
+                    trg_option1 = doc_srp["option1"]
+                    trg_option2 = doc_srp["option2"]
+                    prompt = template.format(
+                        src_sentence=src_sentence,
+                        trg_sentence=trg_sentence,
+                        src_option1=src_option1,
+                        src_option2=src_option2,
+                        trg_option1=trg_option1,
+                        trg_option2=trg_option2
+                    )
+
+                    api_params = {
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "presence_penalty": 0.0,
+                        "frequency_penalty": 0.0
+                    }
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"sentence\":\s*(.*?)\n\s*\"option1\":\s*(.*?)\n\s*\"option2\":\s*(.*?)\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, sentence, option1, option2 = matches[0]
+
+                        num_underscores = len(re.findall("_", sentence))
+
+                        if num_underscores != 1:
+                            print(f"Expected exactly one underscore, but found {num_underscores}")
+                            num_attempts -= 1
+                            continue
+
+                        doc_srp["sentence"] = sentence
+                        doc_srp["option1"] = option1
+                        doc_srp["option2"] = option2
+                        break
+
+                elif task_name in ["boolq"]:
+                    # Eval method: loglikelihood of "yes" and "no" given passage and question
+                    src_passage = doc_eng["passage"]
+                    src_question = doc_eng["question"]
+                    trg_passage = doc_srp["passage"]
+                    trg_question = doc_srp["question"]
+                    prompt = template.format(
+                        src_passage=src_passage,
+                        src_question=src_question,
+                        trg_passage=trg_passage,
+                        trg_question=trg_question
+                    )
+
+                    api_params = {
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "presence_penalty": 0.0,
+                        "frequency_penalty": 0.0
+                    }
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(  # removed brackets compared to below
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"passage\":\s*(.*?)\n\s*\"question\":\s*(.*?)\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, passage, question = matches[0]
+
+                        doc_srp["passage"] = passage
+                        doc_srp["question"] = question
+                        break
+                elif task_name in ["arc_easy", "arc_challenge"]:
+                    # Eval method: loglikelihood of choices
+                    qe = doc_eng["query"]
+                    qs = doc_srp["query"]
+                    ce = doc_eng["choices"]
+                    cs = doc_srp["choices"]
+                    prompt = template.format(src_question=qe, src_answer=ce, trg_question=qs, trg_answer=cs)
+
+                    api_params = {
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "presence_penalty": 0.0,
+                        "frequency_penalty": 0.0
+                    }
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"question\":\s*(.*?)\n\s*\"answer\":\s*\[(.*?)\]\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, question, answer = matches[0]
+                        pattern = r'\'(.*?[^\\])\'|"(.*?[^\\])"' # r'\'(.*?)\''
+                        answers = [match[0] or match[1] for match in re.findall(pattern, answer)]
+
+                        if len(answers) != len(doc_eng["choices"]) or not all(isinstance(a, str) for a in answers) or any(a == "" for a in answers):
+                            print(f"Expected same number of answers, but found {len(answers)} and {len(doc_eng['choices'])}")
+                            num_attempts -= 1
+                            continue
+
+                        doc_srp["query"] = question
+                        doc_srp["choices"] = answers
+                        break
+                elif task_name == "nq_open":
+                    # Eval method: greedy until ['\n', '.', ',']}
+                    # In more detail:
+                    # We sample from an LLM until EOT and then split on the above tokens (taking the 0th element from split method)
+                    # That solution is then normalized (lowercased, stripped of whitespace, remove punctuation) and compared exactly against the answer
+                    src_q = doc_eng["question"]
+                    trg_q = doc_srp["question"]
+                    src_a = str(doc_eng["answer"])
+                    trg_a = str(doc_srp["answer"])
+                    prompt = template.format(src_question=src_q, src_answer=src_a, trg_question=trg_q, trg_answer=trg_a)
+
+                    api_params = {
+                        "temperature": 1.0,
+                        "top_p": 1.0,
+                        "presence_penalty": 0.0,
+                        "frequency_penalty": 0.0
+                    }
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"question\":\s*(.*?)\n\s*\"answer\":\s*\[(.*?)\]\s*(?=REASONING:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        reasoning, question, answer = matches[0]
+                        pattern = r'\'(.*?[^\\])\'|"(.*?[^\\])"' # r'\'(.*?)\''
+                        answers = [match[0] or match[1] for match in re.findall(pattern, answer)]
+
+                        if len(answers) != len(doc_eng["answer"]) or not all(isinstance(a, str) for a in answers) or any(a == "" for a in answers):
+                            print(f"Expected same number of answers, but found {len(answers)} and {len(doc_eng['answer'])}")
+                            num_attempts -= 1
+                            continue
+
+                        doc_srp["question"] = question
+                        doc_srp["answer"] = answers
+                        break
+                else:
+                    raise RuntimeError("Unexpected task name")
+
+                if num_attempts == 0:
+                    raise RuntimeError("GPT-4 failed to generate a response")
+
+                f.write(json.dumps(doc_srp, ensure_ascii=False) + "\n")  # write the translated doc to file
+                f.flush()
+                save_human_readable(f_human_readable, reasoning, doc_eng, old_doc_srp, doc_srp, doc_index)
+                progress_bar.update(1)
+    except Exception as e:
+        # Rename output file to indicate that it is incomplete and add doc_id, after that raise again
+        print(e)
+        new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{doc_index-1}.jsonl'
+        os.rename(out_path, os.path.join(out_dir, new_filename))
+
+        new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{doc_index-1}.jsonl'
+        os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
+        raise e
+
+    new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{len(doc_eng) - 1}_end.jsonl'
+    os.rename(out_path, os.path.join(out_dir, new_filename))
+
+    new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{len(doc_eng) - 1}_end.jsonl'
+    os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
 
 
-def get_serbian_docs(in_dir, task_name, is_train=False):
-    suffix = "_train" if is_train else "_test"
+def get_serbian_docs(in_dir, task_name, is_test=False, get_only_file_name=False):
+    suffix = "_test" if is_test else "_train"
     matches = [filename for filename in os.listdir(in_dir) if filename.startswith(f'{task_name}{suffix}')]
     assert len(matches) == 1, f"Expected exactly one match for {task_name}, but found {matches}"
     filename = matches[0]
@@ -397,10 +649,13 @@ def get_serbian_docs(in_dir, task_name, is_train=False):
         for line in f:
             task_docs_serbian.append(json.loads(line))
 
-    return task_docs_serbian
+    if get_only_file_name:
+        return filename
+    else:
+        return task_docs_serbian
 
 
-def refine_eval(task_dict_items, start_from_doc_index=None):
+async def refine_eval(task_dict_items, start_from_doc_index=None):
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
     parent_dir_path = os.path.abspath(os.path.join(this_file_path, os.pardir))
@@ -408,6 +663,7 @@ def refine_eval(task_dict_items, start_from_doc_index=None):
     in_dir = os.path.join(parent_dir_path, "serbian_eval", "transliterated")
     prompt_templates_dir = os.path.join(parent_dir_path, "serbian_eval", "prompts")
     os.makedirs(out_dir, exist_ok=True)
+    instructor = OpenAIHandler()
 
     try:
         for task_name, task in task_dict_items:
@@ -426,18 +682,18 @@ def refine_eval(task_dict_items, start_from_doc_index=None):
             # first_level_keys = set([x.split('/')[0] for x in keys_of_interest])
             # second_level_keys = set([x.split('/')[1] for x in keys_of_interest if len(x.split('/')) > 1])
 
-            task_docs_serbian = get_serbian_docs(in_dir, task_name, is_train=False)
+            task_docs_serbian = get_serbian_docs(in_dir, task_name, is_test=True)
             task_docs = list(task_doc_func())
             assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-            refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir)
+            await refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index)
 
             if task_name in ["nq_open", "triviaqa"]:
-                task_docs_serbian = get_serbian_docs(in_dir, task_name, is_train=True)
+                task_docs_serbian = get_serbian_docs(in_dir, task_name, is_test=False)
                 task_docs = list(task.training_docs())
                 assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-                refine_dataset(task_docs, task_docs_serbian, task_name, prompt_templates_dir)
+                await refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=False, start_from_doc_index=start_from_doc_index)
 
     except Exception as e:
         print(e)
@@ -504,7 +760,7 @@ def evaluate(
     ]
 
     # translate_eval(task_dict_items, project_id=translation_project_id, char_limit=char_limit, start_from_doc_index=start_from_doc_index)
-    refine_eval(task_dict_items, start_from_doc_index=start_from_doc_index)
+    asyncio.run(refine_eval(task_dict_items, start_from_doc_index=start_from_doc_index))
     exit(0)
 
     results = collections.defaultdict(dict)
