@@ -6,8 +6,12 @@ Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Mon
 
 Thanks to all of our sponsor(s) for donating for the Serbian/HBS LLM & eval projects.
 
+Companies:
+* [psk.rs](https://psk.rs/)
+
 Individuals:
 * [Luka Važić](https://www.linkedin.com/in/vazic/) - Software Engineer at Google
+* [Mitar Perovic](https://www.linkedin.com/in/perovicmitar/) - Machine Learning Engineer at SmartCat.io
 
 ## What is currently covered:
 * Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
