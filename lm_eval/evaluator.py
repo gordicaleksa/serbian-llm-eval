@@ -681,7 +681,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             continue
 
                         matches = re.findall(
-                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"question\":\s*(.*?)\n\s*\"answer\":\s*\[(.*?)\]\s*(?=REASONING:|$)",
+                            r"SERBIAN:\s*\"question\":\s*(.*?)\n\s*\"answer\":\s*\[(.*?)\]\s*(?=REASONING:|$)",
                             response,
                             re.DOTALL
                         )
@@ -691,7 +691,8 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             num_attempts -= 1
                             continue
 
-                        reasoning, question, answer = matches[0]
+                        question, answer = matches[0]
+                        reasoning = ""
                         pattern = r'\'(.*?[^\\])\'|"(.*?[^\\])"' # r'\'(.*?)\''
                         answers = [match[0] or match[1] for match in re.findall(pattern, answer)]
 
