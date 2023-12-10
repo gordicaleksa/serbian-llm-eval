@@ -594,7 +594,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             continue
 
                         matches = re.findall(
-                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"sentence\":\s*(.*?)\n\s*\"option1\":\s*(.*?)\n\s*\"option2\":\s*(.*?)\s*(?=REASONING:|$)",
+                            r"SERBIAN:\s*\"sentence\":\s*(.*?)\n\s*\"option1\":\s*(.*?)\n\s*\"option2\":\s*(.*?)\s*(?=REASONING:|$)",
                             response,
                             re.DOTALL
                         )
@@ -604,7 +604,8 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             num_attempts -= 1
                             continue
 
-                        reasoning, sentence, option1, option2 = matches[0]
+                        sentence, option1, option2 = matches[0]
+                        reasoning = ""
 
                         num_underscores = len(re.findall("_", sentence))
 
