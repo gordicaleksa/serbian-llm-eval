@@ -490,7 +490,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             continue
 
                         matches = re.findall(
-                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"query\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\n\s*\"choice3\":\s*(.*?)\n\s*\"choice4\":\s*(.*?)\s*(?=REASONING:|$)",
+                            r"SERBIAN:\s*\"query\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\n\s*\"choice3\":\s*(.*?)\n\s*\"choice4\":\s*(.*?)\s*(?=REASONING:|$)",
                             response,
                             re.DOTALL
                         )
@@ -500,7 +500,8 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             num_attempts -= 1
                             continue
 
-                        reasoning, query, choice1, choice2, choice3, choice4 = matches[0]
+                        query, choice1, choice2, choice3, choice4 = matches[0]
+                        reasoning = ""
 
                         doc_srp["query"] = query
                         doc_srp["choices"] = [choice1, choice2, choice3, choice4]
