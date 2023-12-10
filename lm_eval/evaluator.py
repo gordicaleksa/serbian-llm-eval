@@ -644,7 +644,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             continue
 
                         matches = re.findall(  # removed brackets compared to below
-                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"passage\":\s*(.*?)\n\s*\"question\":\s*(.*?)\s*(?=REASONING:|$)",
+                            r"SERBIAN:\s*\"passage\":\s*(.*?)\n\s*\"question\":\s*(.*?)\s*(?=REASONING:|$)",
                             response,
                             re.DOTALL
                         )
@@ -654,7 +654,8 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             num_attempts -= 1
                             continue
 
-                        reasoning, passage, question = matches[0]
+                        passage, question = matches[0]
+                        reasoning = ""
 
                         doc_srp["passage"] = passage
                         doc_srp["question"] = question

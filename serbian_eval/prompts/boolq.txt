@@ -1,26 +1,16 @@
-I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+I would like you to help me translate English into Serbian (Latin script).
 
-Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
-
-Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
-If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
-
-Make sure you first reason before outputting the final Serbian translation.
+You are given a translation from Google translate as a source of inspiration, but bear in mind that it often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
 
 Output format should be:
 
-REASONING:
-[your reasoning goes here, use bullet points]
 SERBIAN:
 "passage": refined passage goes here
 "question": refined question goes here
 
-Note: passage and question are obviously related so do use the information in "question" to help you translate "passage" and vice versa.
-Later we will be concatenating passage and question like this (example in Python): f'<passage>\nQuestion: <question>?\nAnswer:'. So make sure to keep the natural flow between the "passage" and "question".
+Remember: All output text should be in Serbian except that "SERBIAN", "passage", and "question" are special tokens that must not be translated.
 
-Remember: All output text should be in Serbian except that "REASONING", "SERBIAN", "passage", "question" are special tokens that must not be translated.
-
-Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation in Serbian.
 
 ENGLISH:
 "passage": {src_passage}
