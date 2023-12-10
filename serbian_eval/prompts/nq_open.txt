@@ -65,7 +65,7 @@ SERBIAN:
 
 Note: question and answer are obviously related so do use the information in "question" to help you translate "answer" and vice versa.
 
-Remember: All output text should be in Serbian with some exceptions as shown in the example above. "REASONING", "SERBIAN", "question", "answer" are special tokens that must not be translated.
+Remember: All output text should be in Serbian with some exceptions as shown in the examples above. "REASONING", "SERBIAN", "question", "answer" are special tokens that must not be translated.
 
 Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
 

@@ -413,6 +413,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                 if task_name in ["piqa"]:
                     # Eval method: loglikelihood of choices (this is similar to all those that were in the format question + answer, arc etc.)
+                    # piqa is very similar to question - answer tasks like arc (also have fixed number of choices as opposed to nq_open)
                     src_goal = doc_eng["goal"]
                     src_choices = doc_eng["choices"]
                     trg_goal = doc_srp["goal"]
@@ -593,6 +594,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                         break
                 elif task_name in ["arc_easy", "arc_challenge"]:
                     # Eval method: loglikelihood of choices
+                    # Very similar to nq_open task below except that we always have exactly 4 choices
                     qe = doc_eng["query"]
                     qs = doc_srp["query"]
                     ce = doc_eng["choices"]
@@ -638,6 +640,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     # In more detail:
                     # We sample from an LLM until EOT and then split on the above tokens (taking the 0th element from split method)
                     # That solution is then normalized (lowercased, stripped of whitespace, remove punctuation) and compared exactly against the answer
+                    # Answers are very short and the number varies from 1 to N (23 even)
                     src_q = doc_eng["question"]
                     trg_q = doc_srp["question"]
                     src_a = str(doc_eng["answer"])
