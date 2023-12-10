@@ -1,0 +1,57 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+The translation into Serbian was done using Google translation and its sole purpose is to ground you and help you create a better final translation using it only as a source of inspiration.
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+Make sure you first reason before outputting the final Serbian translation.
+
+EXAMPLE:
+
+ENGLISH:
+"goal": To cream butter and sugar together, you can
+"choice1": Place it in a bowl and use a hand warmer
+"choice2": Place in a bowl and use a hand mixer
+
+SERBIAN (GOOGLE TRANSLATE):
+"goal": Za kremu od putera i šećera zajedno, možete
+"choice1": Stavite ga u posudu i koristite grejač za ruke
+"choice2": Stavite u posudu i koristite ručni mikser
+
+REASONING:
+- The phrase "To cream butter and sugar together" refers to a cooking term where butter and sugar are combined until they are light and fluffy. Google translate has mistranslated it to try to make literal sense of it - the direct translation resulted in "Za kremu od putera i šećera", which means "For a cream of butter and sugar", rendering the translation nonsensical.
+- The phrase "hand warmer" in "choice1" refers to a device that you put in your hands to warm them. Even though this doesn't make any sense in the context of creaming butter and sugar together, we assume English text is always correct as this is an evaluation task for LLMs and thus will translate this as "grejač za ruke".
+- "choice2" uses the term "hand mixer", which has been translated correctly as "ručni mikser". This is a common kitchen appliance used to mix/blend ingredients together and makes sense in the context.
+SERBIAN:
+"goal": Da biste umutili puter i šećer zajedno, možete da
+"choice1": Stavite smešu u posudu i koristite grejač za ruke
+"chioce2": Stavite smešu u posudu i koristiti ručni mikser
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"goal": refined goal goes here
+"choice1": refined choice 1 goes here
+"choice2": refined choice 2 goes here
+
+Note: goal and choices are obviously related so do use the information in "goal" to help you translate "choice1"/"choice2" and vice versa.
+The "goal" together with "choice1" or "choice2" should form a cohesive, naturally sounding text.
+
+Remember: All output text should be in Serbian except that "REASONING", "SERBIAN", "query", "choice1", "choice2" are special tokens that must not be translated.
+Remember: You can leave your reasoning traces/comments only under the "REASONING" section. "goal", "choice1" and "choice2" should only contain the actual high quality translation.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation in Serbian.
+
+ENGLISH:
+"goal": {src_goal}
+"choice1": {src_choice1}
+"choice2": {src_choice2}
+
+SERBIAN (GOOGLE TRANSLATE):
+"goal": {trg_goal}
+"choice1": {trg_choice1}
+"choice2": {trg_choice2}

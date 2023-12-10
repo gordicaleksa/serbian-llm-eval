@@ -372,9 +372,10 @@ def save_human_readable(f_human_readable, reasoning, doc_eng, old_doc_srp, doc_s
     f_human_readable.write(f"Google Translate (Serbian):\n")
     f_human_readable.write(old_doc_srp_str)
     f_human_readable.write("\n\n")
-    f_human_readable.write(f"GPT-4 reasoning:\n")
-    f_human_readable.write(reasoning)
-    f_human_readable.write("\n\n")
+    if reasoning:
+        f_human_readable.write(f"GPT-4 reasoning:\n")
+        f_human_readable.write(reasoning)
+        f_human_readable.write("\n\n")
     f_human_readable.write(f"Translated doc (Serbian):\n")
     f_human_readable.write(doc_srp_str)
     f_human_readable.write("\n")
@@ -395,9 +396,12 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
     progress_bar = tqdm(task_docs, total=len(task_docs), initial=start_from_doc_index)
 
+    system_prompt = "You are a professional translator. You specialize in translating from English to Serbian. You will be given an English text that comes from a large language model evaluation task. Assume the English text is always correct, even when nonsensical, because its goal is to sometimes confuse the language model."
+    messages=[{"role": "system", "content": system_prompt}]
+
     api_params = {
         "temperature": 1.0,
-        "top_p": 1.0,
+        "top_p": 0.7,
         "presence_penalty": 0.0,
         "frequency_penalty": 0.0
     }
@@ -431,7 +435,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     num_attempts = NUM_ATTEMPTS_GPT4
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
@@ -439,7 +443,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             continue
 
                         matches = re.findall(
-                            r"REASONING:\s*(.*?)\s*SERBIAN:\s*\"goal\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\s*(?=REASONING:|$)",
+                            r"SERBIAN:\s*\"goal\":\s*(.*?)\n\s*\"choice1\":\s*(.*?)\n\s*\"choice2\":\s*(.*?)\s*(?=REASONING:|$)",
                             response,
                             re.DOTALL
                         )
@@ -449,7 +453,8 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                             num_attempts -= 1
                             continue
 
-                        reasoning, goal, choice1, choice2 = matches[0]
+                        goal, choice1, choice2 = matches[0]
+                        reasoning = ""
 
                         doc_srp["goal"] = goal
                         doc_srp["choices"] = [choice1, choice2]
@@ -477,7 +482,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     num_attempts = NUM_ATTEMPTS_GPT4
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
@@ -520,7 +525,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     num_attempts = NUM_ATTEMPTS_GPT4
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
@@ -569,7 +574,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
@@ -605,7 +610,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
@@ -651,7 +656,7 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
 
                     while num_attempts > 0:
                         response = await instructor.gen_with_retry(
-                            prompt, **api_params
+                            prompt, **api_params, messages=messages
                         )
 
                         if response is None:
