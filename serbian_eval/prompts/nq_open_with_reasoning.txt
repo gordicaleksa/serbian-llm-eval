@@ -1,0 +1,78 @@
+I would like you to help me refine an existing translation from Google Translate from English into Serbian (Latin script).
+
+Google translation often has grammatical, syntax errors as well as demonstrations of a basic lack of world knowledge that cause poor translations.
+
+Before you give the final Serbian translation in Latin script ensure you provide step-by-step reasoning for why the Google Translation failed.
+If the translation is good, explain why it is a good translation and proceed to generate a correct, high-quality translation.
+
+EXAMPLES:
+
+ENGLISH:
+"question": who is the girl in green day 21 guns
+"answer": ['Lisa Stelly']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": ko je devojka u zelenom dejstvu 21 oružje
+"answer": ['Lisa Steli']
+
+REASONING:
+* This translation is not correct because it took the name of the band "Green Day" and translated it into Serbian "zelenom dejstvu" instead of just keeping the original English name.
+* Similarly for 21 guns, that's the name of the song so it should not be translated into "21 oružje".
+* Finally albeit this is a fine detail the "answer" should likely be "Liza Steli" and not "Lisa Steli" as that's how the name is pronounced in Serbian.
+SERBIAN:
+"question": Ko je devojka u pesmi "21 guns" grupe Green Day?
+"answer": ['Liza Steli']
+
+ENGLISH:
+"question": when was the last time anyone was on the moon
+"answer": ['14 December 1972 UTC', 'December 1972']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": kada je neko poslednji put bio na Mesecu
+"answer": ['14. decembar 1972. UTC', 'decembra 1972. godine']
+
+REASONING:
+* This translation is very high quality.
+* 'decembra' is a good declension of the noun "decembar"
+SERBIAN:
+"question": kada je neko poslednji put bio na Mesecu
+"answer": ['14. decembar 1972. UTC', 'decembra 1972. godine']
+
+ENGLISH:
+"question": who was the ruler of england in 1616
+"answer": ['James I']
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": koji je bio vladar Engleske 1616
+"answer": ['Džejms I']
+
+REASONING:
+* The translation of "who" into "koji" is incorrect. In Serbian one would use "Ko je bio" here instead of "Koji je bio".
+* That's the only mistake everything else looks good. "Džejms" is a correct translation of "James" in Serbian.
+SERBIAN:
+"question": Ko je bio vladar Engleske 1616. godine?
+"answer": ['Džejms I']
+
+Make sure you first reason before outputting the final Serbian translation. Be even more verbose and thorough than in the above examples.
+
+Output format should be:
+
+REASONING:
+[your reasoning goes here, use bullet points]
+SERBIAN:
+"question": refined translation goes here
+"answer": ['refined answer 1', 'refined answer 2', ...]
+
+Note: question and answer are obviously related so do use the information in "question" to help you translate "answer" and vice versa.
+
+Remember: All output text should be in Serbian with some exceptions as shown in the examples above. "REASONING", "SERBIAN", "question", "answer" are special tokens that must not be translated.
+
+Bellow is the input (both original in English and output from Google Translate). Generate a high quality correct translation.
+
+ENGLISH:
+"question": {src_question}
+"answer": {src_answer}
+
+SERBIAN (GOOGLE TRANSLATE):
+"question": {trg_question}
+"answer": {trg_answer}
