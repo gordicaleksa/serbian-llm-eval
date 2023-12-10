@@ -459,7 +459,67 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                         doc_srp["goal"] = goal
                         doc_srp["choices"] = [choice1, choice2]
                         break
-                elif task_name in ["hellaswag", "openbookqa", "triviaqa"]:
+                elif task_name in ["triviaqa"]:
+                    # Eval method: greedy until
+                    src_question = doc_eng["question"]
+                    src_choices = str(doc_eng["answer"]["aliases"])
+                    src_answer = doc_eng["answer"]["value"]
+                    trg_question = doc_srp["question"]
+                    trg_choices = str(doc_srp["answer"]["aliases"])
+                    trg_answer = doc_srp["answer"]["value"]
+                    prompt = template.format(
+                        src_question=src_question,
+                        src_answers=src_choices,
+                        src_answer=f"['{src_answer}']",
+                        trg_question=trg_question,
+                        trg_answers=trg_choices,
+                        trg_answer=f"['{trg_answer}']"
+                    )
+
+                    num_attempts = NUM_ATTEMPTS_GPT4
+
+                    while num_attempts > 0:
+                        response = await instructor.gen_with_retry(
+                            prompt, **api_params, messages=messages
+                        )
+
+                        if response is None:
+                            num_attempts -= 1
+                            continue
+
+                        matches = re.findall(
+                            r"SERBIAN:\s*\"question\":\s*(.*?)\n\s*\"answers\":\s*\[(.*?)\]\s*\"answer\":\s*\[(.*?)\]\s*(?=SERBIAN:|$)",
+                            response,
+                            re.DOTALL
+                        )
+
+                        if len(matches) != 1:
+                            print(f"Expected exactly one match, but found {matches}")
+                            num_attempts -= 1
+                            continue
+
+                        question, answers_str, answer_str = matches[0]
+                        reasoning = ""
+                        pattern = r'\'(.*?[^\\])\'|"(.*?[^\\])"'
+                        answers = [match[0] or match[1] for match in re.findall(pattern, answers_str)]
+                        answer = [match[0] or match[1] for match in re.findall(pattern, answer_str)]
+                        if len(answer) != 1:
+                            print(f"Expected exactly one answer, but found {answer}")
+                            num_attempts -= 1
+                            continue
+
+                        answer = answer[0]
+
+                        if len(answers) != len(doc_eng["answer"]["aliases"]) or not all(isinstance(a, str) for a in answers) or any(a == "" for a in answers):
+                            print(f"Expected same number of answers, but found {len(answers)} and {len(doc_eng['answer'])}")
+                            num_attempts -= 1
+                            continue
+
+                        doc_srp["question"] = question
+                        doc_srp["answer"]["aliases"] = answers
+                        doc_srp["answer"]["value"] = answer
+                        break
+                elif task_name in ["hellaswag", "openbookqa"]:
                     # Eval method: loglikelihood of choices
                     src_query = doc_eng["query"]
                     src_choices = doc_eng["choices"]
