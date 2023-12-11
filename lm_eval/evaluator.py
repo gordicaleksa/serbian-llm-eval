@@ -1,6 +1,7 @@
 import collections
 import itertools
 import random
+from copy import deepcopy
 
 import lm_eval.metrics
 import lm_eval.models
@@ -217,7 +218,7 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                 if start_from_doc_index is not None and doc_index < start_from_doc_index:
                     continue
 
-                translated_doc = doc.copy()  # create a copy of the doc
+                translated_doc = deepcopy(doc)  # create a copy of the doc
 
                 if exit_flag:
                     raise Exception(f"Char limit exceeded {char_limit}. Exiting...")

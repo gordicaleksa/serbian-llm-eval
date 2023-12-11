@@ -9,12 +9,13 @@ Thanks to all of our sponsor(s) for donating for the yugoGPT & eval projects.
 yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 Eval is continuously being worked on - currently using GPT-4 to refine it automatically plus using manual verification/editing.
 
-Companies:
-* [psk.rs](https://psk.rs/)
-
 Individuals:
 * [Luka Važić](https://www.linkedin.com/in/vazic/) - Software Engineer at Google
 * [Mitar Perovic](https://www.linkedin.com/in/perovicmitar/) - Machine Learning Engineer at SmartCat.io
+
+Companies:
+* [psk.rs](https://psk.rs/)
+* [OmniStreak](https://omnistreak.com/)
 
 ## What is currently covered:
 * Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
