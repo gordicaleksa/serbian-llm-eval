@@ -9,13 +9,25 @@ Thanks to all of our sponsor(s) for donating for the yugoGPT & eval projects.
 yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 Eval is continuously being worked on - currently using GPT-4 to refine it automatically plus using manual verification/editing.
 
-Individuals:
-* [Luka Važić](https://www.linkedin.com/in/vazic/) - Software Engineer at Google
-* [Mitar Perovic](https://www.linkedin.com/in/perovicmitar/) - Machine Learning Engineer at SmartCat.io
+## Platinum sponsors
+* <b>Ivan</b> (fizicko lice, anoniman)
 
-Companies:
-* [psk.rs](https://psk.rs/)
-* [OmniStreak](https://omnistreak.com/)
+## Gold sponsors
+* **qq** (fizicko lice, anoniman)
+* [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
+* [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
+
+## Silver sponsors
+- [**psk.rs**](https://psk.rs/)
+- [**OmniStreak**](https://omnistreak.com/)
+- [**Luka Vazic**](https://www.linkedin.com/in/vazic/)
+- [**Miloš Durković**](https://www.linkedin.com/in/milo%C5%A1-d-684b99188/)
+- [**Marjan Radeski**](https://www.linkedin.com/in/marjanradeski/)
+- **Marjan Stankovic**
+- [**Nikola Stojiljkovic**](https://www.linkedin.com/in/nikola-stojiljkovic-10469239/)
+- [**Mihailo Tomic**](https://www.linkedin.com/in/mihailotomic/)
+- [**Bojan Jevtic**](https://www.linkedin.com/in/bojanjevtic/)
+- [**Jelena Jovanović**](https://www.linkedin.com/in/eldumo/)
 
 ## What is currently covered:
 * Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
