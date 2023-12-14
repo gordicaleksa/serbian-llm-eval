@@ -487,7 +487,7 @@ class Task(abc.ABC):
     # The name of a subset within `DATASET_PATH`.
     DATASET_NAME: str = None
 
-    def __init__(self, data_dir=None, cache_dir=None, download_mode=None):
+    def __init__(self, data_dir=None, cache_dir=None, download_mode=None, language="English"):
         """
         :param data_dir: str
             Stores the path to a local folder containing the `Task`'s data files.
@@ -513,6 +513,7 @@ class Task(abc.ABC):
         self.download(data_dir, cache_dir, download_mode)
         self._training_docs = None
         self._fewshot_docs = None
+        self._language = language
 
     def download(self, data_dir=None, cache_dir=None, download_mode=None):
         """Downloads and returns the task dataset.

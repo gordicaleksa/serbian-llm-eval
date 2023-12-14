@@ -55,7 +55,10 @@ class BoolQ(Task):
         return self.dataset["validation"]
 
     def doc_to_text(self, doc):
-        return f"{doc['passage']}\nQuestion: {doc['question']}?\nAnswer:"
+        if self._language == "Serbian":
+            return f"{doc['passage']}\Pitanje: {doc['question']}?\nOdgovor:"
+        else:
+            return f"{doc['passage']}\nQuestion: {doc['question']}?\nAnswer:"
 
     def should_decontaminate(self):
         return True
@@ -68,8 +71,8 @@ class BoolQ(Task):
 
     def construct_requests(self, doc, ctx):
 
-        ll_yes, _ = rf.loglikelihood(ctx, " yes")
-        ll_no, _ = rf.loglikelihood(ctx, " no")
+        ll_yes, _ = rf.loglikelihood(ctx, " da" if self._language == "Serbian" else " yes")
+        ll_no, _ = rf.loglikelihood(ctx, " ne" if self._language == "Serbian" else " no")
 
         return ll_yes, ll_no
 

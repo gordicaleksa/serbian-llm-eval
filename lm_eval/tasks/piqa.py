@@ -57,7 +57,10 @@ class PiQA(MultipleChoiceTask):
         return out_doc
 
     def doc_to_text(self, doc):
-        return "Question: " + doc["goal"] + "\nAnswer:"
+        if self._language == "Serbian":
+            return "Pitanje: " + doc["goal"] + "\nOdgovor:"
+        else:
+            return "Question: " + doc["goal"] + "\nAnswer:"
 
     def should_decontaminate(self):
         return True

@@ -11,8 +11,9 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--translation_project_id", type=str, default=None, required=True)
+    parser.add_argument("--language", type=str, default="Serbian")
     parser.add_argument("--char_limit", type=int, default=None, required=True)
-    parser.add_argument("--start_from_doc_index", type=int, default=None, required=True)
+    parser.add_argument("--start_from_doc_index", type=str, default=None, required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
     parser.add_argument(
@@ -62,8 +63,12 @@ def main():
     else:
         task_names = utils.pattern_match(args.tasks.split(","), tasks.ALL_TASKS)
 
-    if len(task_names) > 1:
-        raise ValueError("Please specify only one task can be specified at a time to avoid unexpected billing issues, and make sure you've set proper char limit.")
+    task_names_direct = args.tasks.split(",")
+    assert set(task_names_direct) == set(task_names), f'Expected {task_names} to be equal to {task_names_direct}'
+    permutation = [task_names_direct.index(task_name) for task_name in task_names]
+    args.start_from_doc_index = [int(start_index) for start_index in args.start_from_doc_index.split(",")]
+    assert len(args.start_from_doc_index) == len(task_names), f'Expected start_from_doc_index len = {len(args.start_from_doc_index)} to be equal to num tasks = {len(task_names)}'
+    args.start_from_doc_index = [args.start_from_doc_index[i] for i in permutation]
 
     print(f"Selected Tasks: {task_names}")
 
@@ -90,6 +95,7 @@ def main():
         translation_project_id=args.translation_project_id,
         char_limit=args.char_limit,
         start_from_doc_index=args.start_from_doc_index,
+        language=args.language,
     )
 
     dumped = json.dumps(results, indent=2)

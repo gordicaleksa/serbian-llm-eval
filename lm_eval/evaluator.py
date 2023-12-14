@@ -42,6 +42,7 @@ def simple_evaluate(
     translation_project_id=None,
     char_limit=500000,
     start_from_doc_index=None,
+    language="English",
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -115,7 +116,7 @@ def simple_evaluate(
     #         + ".db",
     #     )
 
-    task_dict = lm_eval.tasks.get_task_dict(tasks)
+    task_dict = lm_eval.tasks.get_task_dict(tasks, language=language)
 
     if check_integrity:
         run_task_tests(task_list=tasks)
@@ -771,10 +772,10 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
         os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
         raise e
 
-    new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{len(doc_eng) - 1}_end.jsonl'
+    new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{len(task_docs) - 1}_end.jsonl'
     os.rename(out_path, os.path.join(out_dir, new_filename))
 
-    new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{len(doc_eng) - 1}_end.jsonl'
+    new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{len(task_docs) - 1}_end.jsonl'
     os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
 
 
@@ -806,7 +807,8 @@ async def refine_eval(task_dict_items, start_from_doc_index=None):
     instructor = OpenAIHandler()
 
     try:
-        for task_name, task in task_dict_items:
+        futures = []
+        for task_idx, (task_name, task) in enumerate(task_dict_items):
             print('*' * 50)
             print(f"Translating task: {task_name}")
             print('*' * 50)
@@ -826,20 +828,25 @@ async def refine_eval(task_dict_items, start_from_doc_index=None):
             task_docs = list(task_doc_func())
             assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-            await refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index)
+            futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index[task_idx]))
 
             if task_name in ["nq_open", "triviaqa"]:
                 task_docs_serbian = get_serbian_docs(in_dir, task_name, is_test=False)
                 task_docs = list(task.training_docs())
                 assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-                await refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=False, start_from_doc_index=start_from_doc_index)
+                futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=False, start_from_doc_index=start_from_doc_index))
+
+        await asyncio.gather(*futures)
+        print('all tasks done')
 
     except Exception as e:
         print(e)
         exit(0)
 
-    print(f'Ok, done!')
+    print("*" * 50)
+    print(f'Refinement completed!')
+    print("*" * 50)
 
 
 @positional_deprecated

@@ -51,7 +51,10 @@ class TriviaQA(Task):
         raise NotImplementedError()
 
     def doc_to_text(self, doc):
-        return f"Question: {doc['question']}\nAnswer:"
+        if self._language == "Serbian":
+            return f"Pitanje: {doc['question']}\nOdgovor:"
+        else:
+            f"Question: {doc['question']}\nAnswer:"
 
     def should_decontaminate(self):
         return True
