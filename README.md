@@ -239,3 +239,4 @@ A huge thank you to the following contributors who selflessly went through the s
 * [Nenad Aksentijevic](https://www.linkedin.com/in/nenad-aksentijevic-21629a1b6)
 * [Isaac Nicolas](https://www.linkedin.com/in/isaacnicolas/)
 * [Brian Pulfer](https://www.brianpulfer.ch/)
+* [Aldin Cimpo](https://www.linkedin.com/in/aldin-c-b26334189/)
