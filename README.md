@@ -1,6 +1,6 @@
-# Serbian LLM eval
+# Serbian LLM eval 🇷🇸
 
-Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Montenegrin).
+Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Montenegrin) - support for these languages is on my roadmap (see [future work](#future-work)).
 
 ## What is currently covered:
 * Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
