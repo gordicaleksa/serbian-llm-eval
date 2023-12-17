@@ -411,9 +411,9 @@ def get_task_name_from_object(task_object):
     )
 
 
-def get_task_dict(task_name_list: List[Union[str, lm_eval.base.Task]]):
+def get_task_dict(task_name_list: List[Union[str, lm_eval.base.Task]], language="English"):
     task_name_dict = {
-        task_name: get_task(task_name)()
+        task_name: get_task(task_name)(language=language)
         for task_name in task_name_list
         if isinstance(task_name, str)
     }

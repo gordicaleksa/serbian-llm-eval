@@ -13,8 +13,8 @@
             "justMyCode": false,
             "args": [
                 "--model", "hf",
-                "--model_args", "pretrained=mistralai/Mistral-7B-v0.1",  //   /hdd/BalkanGPT/yugoGPT/checkpoint-18000_312/
-                "--tasks", "triviaqa",
+                "--model_args", "pretrained=mistralai/Mistral-7B-v0.1",  // /hdd/BalkanGPT/yugoGPT/checkpoint-18000_312/
+                "--tasks", "arc_challenge,arc_easy,boolq,hellaswag,nq_open,openbookqa,piqa,triviaqa,winogrande",
             ]
         }
     ]
