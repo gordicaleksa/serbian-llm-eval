@@ -20,7 +20,7 @@ class HFLM(BaseLM):
 
     def __init__(
         self,
-        device="cuda:1",
+        device="cuda",
         pretrained="gpt2",
         revision="main",
         low_cpu_mem_usage=None,
@@ -74,7 +74,7 @@ class HFLM(BaseLM):
                     else torch.device("cpu")
                 )
             revision = revision + ("/" + subfolder if subfolder is not None else "")
-            # pretrained = "jerteh/gpt2-orao"
+
             # Initialize new model and tokenizer instances
             self.model = transformers.AutoModelForCausalLM.from_pretrained(
                 pretrained,
@@ -89,38 +89,6 @@ class HFLM(BaseLM):
                 revision=revision,
                 trust_remote_code=trust_remote_code,
             )
-            # model_config = transformers.MistralConfig(**{  "_name_or_path": "/hdd/BalkanGPT/yugoGPT/checkpoint-18000_312/",  "architectures": [    "MistralForCausalLM"  ],  "bos_token_id": 1,  "eos_token_id": 2,  "hidden_act": "silu",  "hidden_size": 4096,  "initializer_range": 0.02,  "intermediate_size": 14336,  "max_position_embeddings": 32768,  "model_type": "mistral",  "num_attention_heads": 32,  "num_hidden_layers": 32,  "num_key_value_heads": 8,  "rms_norm_eps": 1e-05,  "rope_theta": 10000.0,  "sliding_window": 4096,  "tie_word_embeddings": False, "torch_dtype": "bfloat16", "transformers_version": "4.35.1", "use_cache": False, "vocab_size": 32000})
-            # model_kwargs = {'device_map': None, 'torch_dtype': torch.bfloat16, 'use_flash_attention_2': True}
-            # # Initialize new model and tokenizer instances
-            # self.model = transformers.MistralForCausalLM.from_pretrained(
-            #     pretrained,
-            #     config=model_config,
-            #     load_in_8bit=load_in_8bit,
-            #     load_in_4bit=False,
-            #     trust_remote_code=trust_remote_code,
-            #     **model_kwargs,
-            # )
-            # self.model.tie_weights()
-
-            # # for name, module in model.named_modules():
-            # #     if "norm" in name:
-            # #         module.to(torch.float32)
-            # #     if model_config.model_type == "btlm":
-            # #         # don't upcast lm_head for btlm
-            # #         continue
-            # #     if "lm_head" in name or "embed_tokens" in name:
-            # #         if hasattr(module, "weight"):
-            # #             module.to(torch.float32)
-            # #         model.config.use_cache = False
-            # #             model = model.to(cfg.device)
-            # self.model.to(torch.bfloat16)
-            # self.model.to(self.device)
-            # self.tokenizer = transformers.LlamaTokenizer.from_pretrained(
-            #     tokenizer if tokenizer else pretrained,
-            #     # revision=revision,
-            #     use_fast=True,
-            #     trust_remote_code=trust_remote_code,
-            # )
 
         else:
             raise TypeError(
