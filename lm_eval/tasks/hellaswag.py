@@ -32,6 +32,14 @@ class HellaSwag(MultipleChoiceTask):
     DATASET_PATH = "hellaswag"
     DATASET_NAME = None
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+            self.DATASET_NAME = "hellaswag"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -47,16 +55,23 @@ class HellaSwag(MultipleChoiceTask):
         return self._training_docs
 
     def validation_docs(self):
-        return map(self._process_doc, self.dataset["validation"])
+        return map(self._process_doc, self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"])
 
     def _process_doc(self, doc):
-        ctx = doc["ctx_a"] + " " + doc["ctx_b"].capitalize()
-        out_doc = {
-            "query": self.preprocess(doc["activity_label"] + ": " + ctx),
-            "choices": [self.preprocess(ending) for ending in doc["endings"]],
-            "gold": int(doc["label"]),
-        }
-        return out_doc
+        if self._language == "Serbian":
+            return {
+                "query": doc["query"],
+                "choices": doc["choices"],
+                "gold": doc["gold"],
+            }
+        else:
+            ctx = doc["ctx_a"] + " " + doc["ctx_b"].capitalize()
+            out_doc = {
+                "query": self.preprocess(doc["activity_label"] + ": " + ctx),
+                "choices": [self.preprocess(ending) for ending in doc["endings"]],
+                "gold": int(doc["label"]),
+            }
+            return out_doc
 
     @classmethod
     def preprocess(cls, text):

@@ -31,6 +31,14 @@ class PiQA(MultipleChoiceTask):
     DATASET_PATH = "piqa"
     DATASET_NAME = None
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+            self.DATASET_NAME = "piqa"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -46,18 +54,28 @@ class PiQA(MultipleChoiceTask):
         return self._training_docs
 
     def validation_docs(self):
-        return map(self._process_doc, self.dataset["validation"])
+        return map(self._process_doc, self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"])
 
     def _process_doc(self, doc):
-        out_doc = {
-            "goal": doc["goal"],
-            "choices": [doc["sol1"], doc["sol2"]],
-            "gold": doc["label"],
-        }
-        return out_doc
+        if self._language == "Serbian":
+            return {
+                "goal": doc["goal"],
+                "choices": doc["choices"],
+                "gold": doc["gold"],
+            }
+        else:
+            out_doc = {
+                "goal": doc["goal"],
+                "choices": [doc["sol1"], doc["sol2"]],
+                "gold": doc["label"],
+            }
+            return out_doc
 
     def doc_to_text(self, doc):
-        return "Question: " + doc["goal"] + "\nAnswer:"
+        if self._language == "Serbian":
+            return "Pitanje: " + doc["goal"] + "\nOdgovor:"
+        else:
+            return "Question: " + doc["goal"] + "\nAnswer:"
 
     def should_decontaminate(self):
         return True

@@ -36,6 +36,14 @@ class Winogrande(Task):
 
     answer_to_num = {"1": 0, "2": 1}
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+            self.DATASET_NAME = "winogrande"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -51,7 +59,7 @@ class Winogrande(Task):
         return self._training_docs
 
     def validation_docs(self):
-        return self.dataset["validation"]
+        return self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"]
 
     def doc_to_text(self, doc):
         return self.partial_context(doc, doc["option" + doc["answer"]])

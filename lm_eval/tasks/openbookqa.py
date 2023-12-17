@@ -32,6 +32,14 @@ class OpenBookQA(MultipleChoiceTask):
     DATASET_PATH = "openbookqa"
     DATASET_NAME = "main"
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+            self.DATASET_NAME = "openbookqa"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -53,13 +61,20 @@ class OpenBookQA(MultipleChoiceTask):
         return map(self._process_doc, self.dataset["test"])
 
     def _process_doc(self, doc):
-        out_doc = {
-            "id": doc["id"],
-            "query": doc["question_stem"],
-            "choices": doc["choices"]["text"],
-            "gold": ["A", "B", "C", "D"].index(doc["answerKey"].strip()),
-        }
-        return out_doc
+        if self._language == "Serbian":
+            return {
+                "query": doc["query"],
+                "choices": doc["choices"],
+                "gold": doc["gold"],
+            }
+        else:
+            out_doc = {
+                "id": doc["id"],
+                "query": doc["question_stem"],
+                "choices": doc["choices"]["text"],
+                "gold": ["A", "B", "C", "D"].index(doc["answerKey"].strip()),
+            }
+            return out_doc
 
     def doc_to_text(self, doc):
         return doc["query"]
