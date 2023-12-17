@@ -11,7 +11,7 @@ You can find the Serbian LLM eval dataset [on HuggingFace](https://huggingface.c
 
 
 
-Please email me at gordicaleksa at gmail com in case you're willing to sponsor the projects I'm working on. 
+Please email me at gordicaleksa at gmail com in case you're willing to sponsor the projects I'm working on.
 
 You will get the credits and eternal glory. :)
 
@@ -22,15 +22,9 @@ I na srpskom, ukoliko ste voljni da finansijski podržite ovaj poduhvat korišć
 Dalje ovaj projekat će pomoći da se pokrene lokalni large language model ekoksistem.
 ``````
 
-# Getting started
+# Run the evals
 
-
-
-
-
-## Create Python environment
-
-You can reuse the above conda env `open-nllb`, additionally do the following:
+### Step 1. Create Python environment
 
 ```
 git clone https://github.com/gordicaleksa/lm-evaluation-harness-serbian
@@ -38,6 +32,13 @@ cd lm-evaluation-harness-serbian
 pip install -e .
 ```
 
+### Step 2. Tweak the launch json and run
+
+`--model_args` <- any name from HuggingFace or a path to HuggingFace compatible checkpoint will work
+
+`--tasks` <- pick any subset of these `arc_challenge,arc_easy,boolq,hellaswag,openbookqa,piqa,winogrande,nq_open,triviaqa`
+
+`--num_fewshot` <- set the number of shots, should be 0 for all tasks except for `nq_open` and `triviaqa`
 
 
 ## Future work:
@@ -90,3 +91,14 @@ A huge thank you to the following technical contributors who helped translate th
 ## License
 
 Apache 2.0
+
+## Citation
+
+```
+@article{serbian-llm-eval,
+  author    = "Gordić Aleksa",
+  title     = "Serbian LLM Eval",
+  year      = "2023"
+  howpublished = {\url{https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1}},
+}
+```
