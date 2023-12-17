@@ -38,8 +38,7 @@ pip install -e .
 
 `--tasks` <- pick any subset of these `arc_challenge,arc_easy,boolq,hellaswag,openbookqa,piqa,winogrande,nq_open,triviaqa`
 
-`--num_fewshot` <- set the number of shots, should be 0 for all tasks except for `nq_open` and `triviaqa`
-
+`--num_fewshot` <- set the number of shots, should be 0 for all tasks except for `nq_open` and `triviaqa` (these should be run in 5-shot manner if you want to compare against Mistral 7B)
 
 ## Future work:
 
