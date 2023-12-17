@@ -1,232 +1,243 @@
-# Language Model Evaluation Harness
+# Serbian LLM eval
 
-## We're Refactoring LM-Eval!
-(as of 6/15/23)
-We have a revamp of the Evaluation Harness library internals staged on the [big-refactor](https://github.com/EleutherAI/lm-evaluation-harness/tree/big-refactor) branch! It is far along in progress, but before we start to move the `master` branch of the repository over to this new design with a new version release, we'd like to ensure that it's been tested by outside users and there are no glaring bugs.
+Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Montenegrin). Also see the [future work](#future-work) section below.
 
-We’d like your help to test it out! you can help by:
-1. Trying out your current workloads on the big-refactor branch, and seeing if anything breaks or is counterintuitive,
-2. Porting tasks supported in the previous version of the harness to the new YAML configuration format. Please check out our [task implementation guide](https://github.com/EleutherAI/lm-evaluation-harness/blob/big-refactor/docs/new_task_guide.md) for more information.
+## Sponsors
 
-If you choose to port a task not yet completed according to [our checklist](https://github.com/EleutherAI/lm-evaluation-harness/blob/big-refactor/lm_eval/tasks/README.md), then you can contribute it by opening a PR containing [Refactor] in the name with:
-- A shell command to run the task in the `master` branch, and what the score is
-- A shell command to run the task in your PR branch to `big-refactor`, and what the resulting score is, to show that we achieve equality between the two implementations.
+Thanks to all of our sponsor(s) for donating for the yugoGPT & eval projects.
 
-Lastly, we'll no longer be accepting new feature requests beyond those that are already open to the master branch as we carry out this switch to the new version over the next week, though we will be accepting bugfixes to `master` branch and PRs to `big-refactor`. Feel free to reach out in the #lm-thunderdome channel of the EAI discord for more information.
+yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
+Eval is continuously being worked on - currently using GPT-4 to refine it automatically plus using manual verification/editing.
+
+## Platinum sponsors
+* <b>Ivan</b> (fizicko lice, anoniman)
+
+## Gold sponsors
+* **qq** (fizicko lice, anoniman)
+* [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
+* [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
+
+## Silver sponsors
+- [**psk.rs**](https://psk.rs/)
+- [**OmniStreak**](https://omnistreak.com/)
+- [**Luka Vazic**](https://www.linkedin.com/in/vazic/)
+- [**Miloš Durković**](https://www.linkedin.com/in/milo%C5%A1-d-684b99188/)
+- [**Marjan Radeski**](https://www.linkedin.com/in/marjanradeski/)
+- **Marjan Stankovic**
+- [**Nikola Stojiljkovic**](https://www.linkedin.com/in/nikola-stojiljkovic-10469239/)
+- [**Mihailo Tomic**](https://www.linkedin.com/in/mihailotomic/)
+- [**Bojan Jevtic**](https://www.linkedin.com/in/bojanjevtic/)
+- [**Jelena Jovanović**](https://www.linkedin.com/in/eldumo/)
+- [**Nenad Davidović**](https://www.linkedin.com/in/nenad-davidovic-662ab749/)
+
+## What is currently covered:
+* Common sense reasoning: `Hellaswag`, `Winogrande`, `PIQA`, `OpenbookQA`, `ARC-Easy`, `ARC-Challenge`
+* World knowledge: `NaturalQuestions`, `TriviaQA`
+* Reading comprehension: `BoolQ`
+
+The motivation for picking these specific tasks:
+* these tasks are supported by EleutherAI's [lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness) project (this project is a fork that was tweaked for purposes of creating the Serbian eval data)
+* these tasks were used by the recent [Mistral 7B LLM paper](https://arxiv.org/abs/2310.06825).
+* I found the intersection and left out a subset of the tasks as the future todos.
+
+## Future work:
+* Manual verification effort (watch out my [Discord server](https://discord.gg/peBrCpheKE) for a datathon announcement that'll happen in few days)
+* Automated verification effort via GPT-4.
+* Make it easy to run Serbian evals through this fork (coming over the next few days as soon as I start running it with [yugoGPT](https://www.linkedin.com/feed/update/urn:li:activity:7133414124553711616/), right now the data is under `serbian_eval` directory)
+* Related to above - create a dataset card for [HuggingFace dataset](https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval)
+* Popular aggregated results: `MMLU`, `BBH`, `AGI Eval`
+* Math: `GSM8K`, `MATH`
+* Explicit support for other HBS languages.
 
 
-## Overview
+Please email me at gordicaleksa at gmail com in case you're willing to sponsor the automated GPT-4 effort. You will get the credits and eternal glory. :)
 
-This project provides a unified framework to test generative language models on a large number of different evaluation tasks.
+In Serbian:
+```
+I na srpskom, ukoliko ste voljni da finansijski podržite ovaj poduhvat korišćenja ChatGPT da se dobiju kvalitetniji podaci, i koji je od nacionalnog/regionalnog interesa, moj email je gordicaleksa at gmail com. Dobićete priznanje na ovom projektu da ste sponzor (i postaćete deo istorije). :)
 
-Features:
+Dalje ovaj projekat će pomoći da se pokrene lokalni large language model ekoksistem.
+``````
 
-- 200+ subtasks / evaluation settings implemented. See the [task-table](./docs/task_table.md) for a complete list.
-- Support for models loaded via [transformers](https://github.com/huggingface/transformers/) (including quantization via [AutoGPTQ](https://github.com/PanQiWei/AutoGPTQ)), [GPT-NeoX](https://github.com/EleutherAI/gpt-neox), and [Megatron-DeepSpeed](https://github.com/microsoft/Megatron-DeepSpeed/), with a flexible tokenization-agnostic interface.
-- Support for commercial APIs including [OpenAI](https://openai.com), [goose.ai](https://goose.ai), and [TextSynth](https://textsynth.com/).
-- Support for evaluation on adapters (e.g. LoRa) supported in [HuggingFace's PEFT library](https://github.com/huggingface/peft).
-- Evaluating with publicly available prompts ensures reproducibility and comparability between papers.
-- Task versioning to ensure reproducibility when tasks are updated.
+## How was the eval created:
+1) Google translate into Serbian (code `sr`) - see the rationale below*
+2) Transliteration from Cyrillic script into Latin script (lossless 1-1 mapping) using `cyrtranslit` package.
+3) Manual verification (a datathon will be organized over the next few days)
 
-## Install
+*Earlier this summer (2023) I've done side by side comparisons of various translation systems (GPT-3.5, GPT-4, NLLB, etc.) and according to Flores 200 benchmarks Google Translate turned out to be the best option. Note that DeepL doesn't even support Serbian language.
 
-To install `lm-eval` from the github repository main branch, run:
+Other benchmarks for Serbian:
 
-```bash
-git clone https://github.com/EleutherAI/lm-evaluation-harness
-cd lm-evaluation-harness
+- https://github.com/facebookresearch/belebele
+- COPA: https://github.com/clarinsi/benchich/tree/main/copa
+
+
+# Creating the eval - instructions
+
+## IMPORTANT
+
+* running this this will eat your google cloud credits or will bill you if you're already in the billing mode (this happens after you spend free credits and then deliberately enable billing again).
+
+* you can use your free credits to translate 500.000 chars / month!
+
+* if this is the first time you're creating a gcloud project you'll have 300$ of free credits!
+
+* sync with Aleksa in [Discord](https://discord.gg/peBrCpheKE) in open-hbs-llm channel on which tasks to tackle next.
+
+## Prerequisites
+
+Before you begin, ensure you meet the following requirements:
+
+**For Linux Users:**
+
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/)
+
+**For Windows Users:**
+1. Windows Subsystem for Linux [(WSL2)](https://learn.microsoft.com/en-us/windows/wsl/install). If you don't have WSL2 installed, follow these steps in Windows cmd/powershell in administrator mode:
+
+    ```bash
+    wsl --install
+
+   // Check version and distribution name.
+   wsl -l -v       
+
+    // Set the newly downloaded linux distro as default.
+    wsl --set-default <distribution name>
+    ```
+2. Install [Git](https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-git) from the WSL terminal.
+
+    ```bash
+    sudo apt update
+    sudo apt install git
+    git --version
+    ```
+3. Install [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/) from the WSL terminal.
+    ```bash
+    mkdir -p ~/miniconda3
+
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+
+    rm -rf ~/miniconda3/miniconda.sh
+
+    // Initialize conda with bash.
+    ~/miniconda3/bin/conda init bash
+    ```
+
+4. Follow the instructions below on WSL.
+
+## Instructions for translating lm harness eval from English into Serbian
+
+First let's setup a minimal Python program that makes sure you can run Google Translate on your local machine.
+
+1. Create a Google Console project (https://console.cloud.google.com/)
+2. Enable Google Translation API -> to enable it you have to setup the billing and input your credit card details (a note regarding safety: you'll have 300$ of free credit (if this is the first time you're doing it) and no one can spend money from your credit card unless all those free credits are spent and you re-enable the billing again! if you already had it setup in that case you have 500.000 chars/month for free!)
+3. Install Google Cloud CLI (gsutil) on your machine (see this: https://cloud.google.com/storage/docs/gsutil_install/)
+    
+    a.) Download the Linux archive file (find latest version from link above)
+
+     `curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-455.0.0-linux-x86_64.tar.gz`
+
+    b.) Extract the contents from the archive file above.
+
+    `tar -xf google-cloud-cli-455.0.0-linux-x86_64.tar.gz`
+
+    c.) Run installation script. `./google-cloud-sdk/install.sh`
+
+    d.) Initiate and authenticate your account. `./google-cloud-sdk/bin/gcloud init`
+    
+    e.) Create a credentials file with `gcloud auth application-default login`
+4. Create and setting up the conda env
+    
+    a.) Open a terminal (if on Windows use the `WSL` terminal, if you're on Linux just use your terminal conda will already be in the PATH)
+    
+    b.) Run `conda create -n open_nllb python=3.10 -y`
+
+    c.) Run `conda activate open_nllb` 
+    
+    d.) Run  `pip install google-cloud-translate`
+
+That's it! After that just create a `test.py` Python file with the following code and run with `Run and Debug` option in VS code after creating the launch.json file:
+
+```Python
+from google.cloud import translate
+
+client = translate.TranslationServiceClient()
+location = "global"
+project_id="<your project id from above>"
+parent = f"projects/{project_id}/locations/{location}"
+
+response = client.translate_text(
+    request={
+        "parent": parent,
+        "contents": ["How do you do? Translate this."],
+        "mime_type": "text/plain",
+        "source_language_code": "en-US",
+        "target_language_code": "sr",
+    }
+)
+value_translated = response.translations[0].translated_text
+print(value_translated)
+```
+
+# Running translation of evals from English into Serbian
+
+Follow these instructions (see below for more details):
+1. Create a Python env for this project
+2. You'll find the program arguments are already specified inside `.vscode/launch.json`
+3. Change `translation_project_id` to the google project id you got in the previous section
+4. Specify amount of characters you're willing to translate (500_000 is the usual free monthly limit)
+5. Run the `main.py`
+
+## Create Python environment
+
+You can reuse the above conda env `open-nllb`, additionally do the following:
+
+```
+git clone https://github.com/gordicaleksa/lm-evaluation-harness-serbian
+cd lm-evaluation-harness-serbian
 pip install -e .
 ```
 
-To install additional multilingual tokenization and text segmentation packages, you must install the package with the `multilingual` extra:
+## Run translation
 
-```bash
-pip install -e ".[multilingual]"
+Finally run (note `model` and `model_args` are not important for us but we need to specify them):
+
 ```
-
-To support loading GPTQ quantized models, install the package with the `auto-gptq` extra:
-
-```bash
-pip install -e ".[auto-gptq]"
-```
-
-## Basic Usage
-
-> **Note**: When reporting results from eval harness, please include the task versions (shown in `results["versions"]`) for reproducibility. This allows bug fixes to tasks while also ensuring that previously reported scores are reproducible. See the [Task Versioning](#task-versioning) section for more info.
-
-### Hugging Face `transformers`
-
-To evaluate a model hosted on the [HuggingFace Hub](https://huggingface.co/models) (e.g. GPT-J-6B) on `hellaswag` you can use the following command:
-
-
-```bash
 python main.py \
-    --model hf-causal \
-    --model_args pretrained=EleutherAI/gpt-j-6B \
+    --model hf \
+    --model_args pretrained=mistralai/Mistral-7B-v0.1 \
     --tasks hellaswag \
-    --device cuda:0
+    --translation_project_id <your project id>
+    --char_limit 500000
+    --start_from_doc_index 0
 ```
 
-Additional arguments can be provided to the model constructor using the `--model_args` flag. Most notably, this supports the common practice of using the `revisions` feature on the Hub to store partially trained checkpoints, or to specify the datatype for running a model:
+or open `main.py` and run using vscode debugger.
 
-```bash
-python main.py \
-    --model hf-causal \
-    --model_args pretrained=EleutherAI/pythia-160m,revision=step100000,dtype="float" \
-    --tasks lambada_openai,hellaswag \
-    --device cuda:0
-```
-
-To evaluate models that are loaded via `AutoSeq2SeqLM` in Huggingface, you instead use `hf-seq2seq`. *To evaluate (causal) models across multiple GPUs, use `--model hf-causal-experimental`*
-
-> **Warning**: Choosing the wrong model may result in erroneous outputs despite not erroring.
+Note:
+* again please sync on Discord about which tasks you should help to translate! :)
+* select only one task at a time, posssible options: `hellaswag,winogrande,piqa,openbookqa,arc_easy,arc_challenge,nq_open,triviaqa,boolq`
+* `start_from_doc_index` is used if you want to resume and translate a particular task only starting from a certain document index (useful in a collaborative setting where multiple people are translating different portions of the task)
 
 
-### Neural Magic `deepsparse`
+## Run transliteration
 
-Models from [SparseZoo](https://sparsezoo.neuralmagic.com/) can be evaluated directly in lm-evaluation-harness using [DeepSparse](https://github.com/neuralmagic/deepsparse):
-```bash
-pip install deepsparse-nightly[llm]
-python main.py --model deepsparse --model_args pretrained=zoo:mpt-7b-gsm8k_mpt_pretrain-pruned70_quantized --tasks gsm8k
-```
+1. Update your env by running `pip install cyrtranslit`
+2. Run the `transliterate_cyrillic_to_latin.py` script
 
-Compatible models hosted on Hugging Face Hub can be used as well:
-```bash
-python main.py --model deepsparse --model_args pretrained=hf:mgoin/TinyLlama-1.1B-Chat-v0.3-ds --tasks hellaswag
-python main.py --model deepsparse --model_args pretrained=hf:neuralmagic/mpt-7b-gsm8k-pruned60-quant-ds --tasks gsm8k
-```
 
-### OpenVINO models converted via HuggingFace Optimum
-```bash
-python main.py --model optimum-causal --model_args pretrained=<model_path_or_name> --task lambada_openai
-```
+# Credits
 
-### Commercial APIs
-
-Our library also supports language models served via the OpenAI API:
-
-```bash
-export OPENAI_API_SECRET_KEY=YOUR_KEY_HERE
-python main.py \
-    --model gpt3 \
-    --model_args engine=davinci \
-    --tasks lambada_openai,hellaswag
-```
-
-While this functionality is only officially maintained for the official OpenAI API, it tends to also work for other hosting services that use the same API such as [goose.ai](goose.ai) with minor modification. We also have an implementation for the [TextSynth](https://textsynth.com/index.html) API, using `--model textsynth`.
-
-To verify the data integrity of the tasks you're performing in addition to running the tasks themselves, you can use the `--check_integrity` flag:
-
-```bash
-python main.py \
-    --model gpt3 \
-    --model_args engine=davinci \
-    --tasks lambada_openai,hellaswag \
-    --check_integrity
-```
-
-### Other Frameworks
-
-A number of other libraries contain scripts for calling the eval harness through their library. These include [GPT-NeoX](https://github.com/EleutherAI/gpt-neox/blob/main/eval_tasks/eval_adapter.py), [Megatron-DeepSpeed](https://github.com/microsoft/Megatron-DeepSpeed/blob/main/examples/MoE/readme_evalharness.md), and [mesh-transformer-jax](https://github.com/kingoflolz/mesh-transformer-jax/blob/master/eval_harness.py).
-
-💡 **Tip**: You can inspect what the LM inputs look like by running the following command:
-
-```bash
-python write_out.py \
-    --tasks all_tasks \
-    --num_fewshot 5 \
-    --num_examples 10 \
-    --output_base_path /path/to/output/folder
-```
-
-This will write out one text file for each task.
-
-## Advanced Usage
-
-For models loaded with the HuggingFace  `transformers` library, any arguments provided via `--model_args` get passed to the relevant constructor directly. This means that anything you can do with `AutoModel` can be done with our library. For example, you can pass a local path via `pretrained=` or use models finetuned with [PEFT](https://github.com/huggingface/peft) by taking the call you would run to evaluate the base model and add `,peft=PATH` to the `model_args` argument:
-```bash
-python main.py \
-    --model hf-causal-experimental \
-    --model_args pretrained=EleutherAI/gpt-j-6b,peft=nomic-ai/gpt4all-j-lora \
-    --tasks openbookqa,arc_easy,winogrande,hellaswag,arc_challenge,piqa,boolq \
-    --device cuda:0
-```
-
-GPTQ quantized models can be loaded by specifying their file names in `,quantized=NAME` (or `,quantized=True` for default names) in the `model_args` argument:
-
-```bash
-python main.py \
-    --model hf-causal-experimental \
-    --model_args pretrained=model-name-or-path,quantized=model.safetensors,gptq_use_triton=True \
-    --tasks hellaswag
-```
-
-GGUF or GGML quantized models can be loaded by using `llama-cpp-python` server:
-
-```bash
-python main.py \
-    --model gguf \
-    --model_args base_url=http://localhost:8000 \
-    --tasks hellaswag
-```
-
-We support wildcards in task names, for example you can run all of the machine-translated lambada tasks via `--task lambada_openai_mt_*`.
-
-We currently only support one prompt per task, which we strive to make the "standard" as defined by the benchmark's authors. If you would like to study how varying prompts causes changes in the evaluation score, check out the [BigScience fork](https://github.com/bigscience-workshop/lm-evaluation-harness) of this repo. We are currently working on upstreaming this capability to `main`.
-
-## Implementing new tasks
-
-To implement a new task in the eval harness, see [this guide](./docs/task_guide.md).
-
-## Task Versioning
-
-To help improve reproducibility, all tasks have a `VERSION` field. When run from the command line, this is reported in a column in the table, or in the "version" field in the evaluator return dict. The purpose of the version is so that if the task definition changes (i.e to fix a bug), then we can know exactly which metrics were computed using the old buggy implementation to avoid unfair comparisons. To enforce this, there are unit tests that make sure the behavior of all tests remains the same as when they were first implemented. Task versions start at 0, and each time a breaking change is made, the version is incremented by one.
-
-When reporting eval harness results, please also report the version of each task. This can be done either with a separate column in the table, or by reporting the task name with the version appended as such: taskname-v0.
-
-## Test Set Decontamination
-
-To address concerns about train / test contamination, we provide utilities for comparing results on a benchmark using only the data points not found in the model training set. Unfortunately, outside of models trained on the Pile and C4, its very rare that people who train models disclose the contents of the training data. However this utility can be useful to evaluate models you have trained on private data, provided you are willing to pre-compute the necessary indices. We provide computed indices for 13-gram exact match deduplication against the Pile, and plan to add additional precomputed dataset indices in the future (including C4 and min-hash LSH deduplication).
-
-For details on text decontamination, see the [decontamination guide](./docs/decontamination.md).
-
-Note that the directory provided to the `--decontamination_ngrams_path` argument should contain the ngram files and info.json. See the above guide for ngram generation for the pile, this could be adapted for other training sets.
-
-```bash
-python main.py \
-    --model gpt2 \
-    --tasks sciq \
-    --decontamination_ngrams_path path/containing/training/set/ngrams \
-    --device cuda:0
-```
-
-## Cite as
-
-```
-@software{eval-harness,
-  author       = {Gao, Leo and
-                  Tow, Jonathan and
-                  Biderman, Stella and
-                  Black, Sid and
-                  DiPofi, Anthony and
-                  Foster, Charles and
-                  Golding, Laurence and
-                  Hsu, Jeffrey and
-                  McDonell, Kyle and
-                  Muennighoff, Niklas and
-                  Phang, Jason and
-                  Reynolds, Laria and
-                  Tang, Eric and
-                  Thite, Anish and
-                  Wang, Ben and
-                  Wang, Kevin and
-                  Zou, Andy},
-  title        = {A framework for few-shot language model evaluation},
-  month        = sep,
-  year         = 2021,
-  publisher    = {Zenodo},
-  version      = {v0.0.1},
-  doi          = {10.5281/zenodo.5371628},
-  url          = {https://doi.org/10.5281/zenodo.5371628}
-}
-```
+A huge thank you to the following contributors who selflessly went through the steps above and helped create this project of immense value:
+* [Vera Prohaska](https://vtwoptwo.com/)
+* [Chu Kin Chan](www.linkedin.com/in/roy-ck-chan)
+* [Joe Makepeace](https://www.linkedin.com/in/joe-makepeace-a872a1183/)
+* [Toby Farmer](https://www.linkedin.com/in/tobyfarmer/)
+* [Malvi Bid](https://www.linkedin.com/in/malvibid/)
+* [Raphael Vienne](https://www.linkedin.com/in/raphael-vienne/)
+* [Nenad Aksentijevic](https://www.linkedin.com/in/nenad-aksentijevic-21629a1b6)
+* [Isaac Nicolas](https://www.linkedin.com/in/isaacnicolas/)
+* [Brian Pulfer](https://www.brianpulfer.ch/)
+* [Aldin Cimpo](https://www.linkedin.com/in/aldin-c-b26334189/)

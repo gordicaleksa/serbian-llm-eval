@@ -5,3 +5,7 @@ lm_cache
 .idea
 
 *.egg-info/
+
+.env
+serbian_eval/
+wandb/
