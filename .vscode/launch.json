@@ -15,9 +15,10 @@
                 "--model", "hf",
                 "--model_args", "pretrained=mistralai/Mistral-7B-v0.1",
                 "--translation_project_id", "ortus-391014",
-                "--tasks", "piqa",
-                "--char_limit", "500000",
+                "--tasks", "triviaqa",
+                "--char_limit", "0",
                 "--start_from_doc_index", "0",
+                "--end_doc_index", "15343",
             ]
         }
     ]

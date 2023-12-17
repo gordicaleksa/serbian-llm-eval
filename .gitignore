@@ -9,3 +9,6 @@ lm_cache
 serbian_eval/translated/*
 serbian_eval/transliterated/*
 .env
+
+serbian_eval/
+wandb/

@@ -55,8 +55,10 @@ class OpenAIHandler:
         self.used_tokens = 0
         self.max_tokens = None
         self.model = "gpt-4"
-        self.openai_api_key = os.environ.get("OPENAI_API_KEY")
-        if not self.openai_api_key:
+        self.openai_api_keys = []
+        self.openai_api_keys.append(os.environ.get("OPENAI_API_KEY1"))
+        self.openai_api_keys.append(os.environ.get("OPENAI_API_KEY2"))
+        if not self.openai_api_keys:
             raise ValueError(
                 "OPENAI_API_KEY environment variable or openai_api_key must be provided"
             )
@@ -73,7 +75,9 @@ class OpenAIHandler:
         :return: Response object.
         :rtype: Dict[str, Any]
         """
-        headers = {"Authorization": f"Bearer {self.openai_api_key}"}
+        open_ai_key = random.choices(self.openai_api_keys, weights=(1, 1), k=1)[0]
+
+        headers = {"Authorization": f"Bearer {open_ai_key}"}
 
         request_id = str(uuid4())
         logger.debug(f"POST [{request_id}] with payload {json.dumps(payload)}")

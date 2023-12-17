@@ -1,5 +1,6 @@
 import asyncio
 import collections
+from copy import deepcopy
 import itertools
 import random
 import re
@@ -42,6 +43,7 @@ def simple_evaluate(
     translation_project_id=None,
     char_limit=500000,
     start_from_doc_index=None,
+    end_doc_index=None,
     language="English",
 ):
     """Instantiate and evaluate a model on a list of tasks.
@@ -78,8 +80,8 @@ def simple_evaluate(
     :return
         Dictionary of results
     """
-    random.seed(1234)
-    np.random.seed(1234)
+    # random.seed(1234)  # need different start random number when I run the code multiple times
+    # np.random.seed(1234)
 
     assert tasks != [], "No tasks specified"
 
@@ -134,6 +136,7 @@ def simple_evaluate(
         translation_project_id=translation_project_id,
         char_limit=char_limit,
         start_from_doc_index=start_from_doc_index,
+        end_doc_index=end_doc_index,
     )
 
     # add info about the model and few shot config
@@ -223,7 +226,7 @@ def translate_dataset(task_name, translate_fn, first_level_keys, second_level_ke
                 if start_from_doc_index is not None and doc_index < start_from_doc_index:
                     continue
 
-                translated_doc = doc.copy()  # create a copy of the doc
+                translated_doc = deepcopy(doc)  # create a copy of the doc
 
                 if exit_flag:
                     raise Exception(f"Char limit exceeded {char_limit}. Exiting...")
@@ -385,14 +388,16 @@ def save_human_readable(f_human_readable, reasoning, doc_eng, old_doc_srp, doc_s
     f_human_readable.flush()
 
 
-async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test, start_from_doc_index=None):
+async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test, start_from_doc_index=None, end_doc_index=None):
     template = get_prompt_template(prompt_templates_dir, task_name)
 
-    NUM_ATTEMPTS_GPT4 = 3
+    NUM_ATTEMPTS_GPT4 = 2
 
-    out_filename = f'{task_name}{"_test" if is_test else "_train"}.jsonl'
+    # Generate a random 7 digit number to be used as a unique identifier for the current run
+    run_id = random.randint(1000, 9999999)
+    out_filename = f'{task_name}_{run_id}_{"_test" if is_test else "_train"}.jsonl'
     out_path = os.path.join(out_dir, out_filename)
-    out_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable.jsonl'
+    out_filename_human_readable = f'{task_name}_{run_id}_{"_test" if is_test else "_train"}_human_readable.jsonl'
     out_path_human_readable = os.path.join(out_dir, out_filename_human_readable)
 
     progress_bar = tqdm(task_docs, total=len(task_docs), initial=start_from_doc_index)
@@ -414,7 +419,10 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                 if start_from_doc_index is not None and doc_index < start_from_doc_index:
                     continue
 
-                old_doc_srp = doc_srp.copy()  # create a copy of the doc
+                if  end_doc_index is not None and doc_index > end_doc_index:
+                    break
+
+                old_doc_srp = deepcopy(doc_srp)  # create a copy of the doc
 
                 if task_name in ["piqa"]:
                     # Eval method: loglikelihood of choices (this is similar to all those that were in the format question + answer, arc etc.)
@@ -756,7 +764,9 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
                     raise RuntimeError("Unexpected task name")
 
                 if num_attempts == 0:
-                    raise RuntimeError("GPT-4 failed to generate a response")
+                    doc_srp = { "text": "TODO" }
+                    reasoning = "TODO"
+                    # raise RuntimeError("GPT-4 failed to generate a response")
 
                 f.write(json.dumps(doc_srp, ensure_ascii=False) + "\n")  # write the translated doc to file
                 f.flush()
@@ -772,10 +782,10 @@ async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, pr
         os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
         raise e
 
-    new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{len(task_docs) - 1}_end.jsonl'
+    new_filename = f'{task_name}{"_test" if is_test else "_train"}_partial_{start_from_doc_index}_{end_doc_index}.jsonl'
     os.rename(out_path, os.path.join(out_dir, new_filename))
 
-    new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{len(task_docs) - 1}_end.jsonl'
+    new_filename_human_readable = f'{task_name}{"_test" if is_test else "_train"}_human_readable_partial_{start_from_doc_index}_{end_doc_index}.jsonl'
     os.rename(out_path_human_readable, os.path.join(out_dir, new_filename_human_readable))
 
 
@@ -796,7 +806,7 @@ def get_serbian_docs(in_dir, task_name, is_test=False, get_only_file_name=False)
         return task_docs_serbian
 
 
-async def refine_eval(task_dict_items, start_from_doc_index=None):
+async def refine_eval(task_dict_items, start_from_doc_index=None, end_doc_index=None):
 
     this_file_path = os.path.dirname(os.path.realpath(__file__))
     parent_dir_path = os.path.abspath(os.path.join(this_file_path, os.pardir))
@@ -828,7 +838,7 @@ async def refine_eval(task_dict_items, start_from_doc_index=None):
             task_docs = list(task_doc_func())
             assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-            futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index[task_idx]))
+            futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index[task_idx], end_doc_index=end_doc_index))
 
             if task_name in ["nq_open", "triviaqa"]:
                 task_docs_serbian = get_serbian_docs(in_dir, task_name, is_test=False)
@@ -864,6 +874,7 @@ def evaluate(
     translation_project_id=None,
     char_limit=500000,
     start_from_doc_index=None,
+    end_doc_index=None,
 ):
     """Instantiate and evaluate a model on a list of tasks.
 
@@ -907,7 +918,7 @@ def evaluate(
     ]
 
     # translate_eval(task_dict_items, project_id=translation_project_id, char_limit=char_limit, start_from_doc_index=start_from_doc_index)
-    asyncio.run(refine_eval(task_dict_items, start_from_doc_index=start_from_doc_index))
+    asyncio.run(refine_eval(task_dict_items, start_from_doc_index=start_from_doc_index,end_doc_index=end_doc_index))
     exit(0)
 
     results = collections.defaultdict(dict)

@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument("--language", type=str, default="Serbian")
     parser.add_argument("--char_limit", type=int, default=None, required=True)
     parser.add_argument("--start_from_doc_index", type=str, default=None, required=True)
+    parser.add_argument("--end_doc_index", type=str, default=None)
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
     parser.add_argument(
@@ -70,6 +71,11 @@ def main():
     assert len(args.start_from_doc_index) == len(task_names), f'Expected start_from_doc_index len = {len(args.start_from_doc_index)} to be equal to num tasks = {len(task_names)}'
     args.start_from_doc_index = [args.start_from_doc_index[i] for i in permutation]
 
+    if args.end_doc_index:
+        end_doc_index =  [int(end_index) for end_index in args.end_doc_index.split(",")]
+        assert len(end_doc_index) == 1, f'Expected end_doc_index len = {len(end_doc_index)} to be equal to 1'  # TMP
+        args.end_doc_index = end_doc_index[0]
+
     print(f"Selected Tasks: {task_names}")
 
     description_dict = {}
@@ -95,6 +101,7 @@ def main():
         translation_project_id=args.translation_project_id,
         char_limit=args.char_limit,
         start_from_doc_index=args.start_from_doc_index,
+        end_doc_index=args.end_doc_index,
         language=args.language,
     )
 
