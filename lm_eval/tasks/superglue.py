@@ -37,6 +37,13 @@ class BoolQ(Task):
     DATASET_PATH = "super_glue"
     DATASET_NAME = "boolq"
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -52,10 +59,13 @@ class BoolQ(Task):
         return self._training_docs
 
     def validation_docs(self):
-        return self.dataset["validation"]
+        return self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"]
 
     def doc_to_text(self, doc):
-        return f"{doc['passage']}\nQuestion: {doc['question']}?\nAnswer:"
+        if self._language == "Serbian":
+            return f"{doc['passage']}\nPitanje: {doc['question']}?\nOdgovor:"
+        else:
+            return f"{doc['passage']}\nQuestion: {doc['question']}?\nAnswer:"
 
     def should_decontaminate(self):
         return True
@@ -68,8 +78,8 @@ class BoolQ(Task):
 
     def construct_requests(self, doc, ctx):
 
-        ll_yes, _ = rf.loglikelihood(ctx, " yes")
-        ll_no, _ = rf.loglikelihood(ctx, " no")
+        ll_yes, _ = rf.loglikelihood(ctx, " da" if self._language == "Serbian" else " yes")
+        ll_no, _ = rf.loglikelihood(ctx, " ne" if self._language == "Serbian" else " no")
 
         return ll_yes, ll_no
 

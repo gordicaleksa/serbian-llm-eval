@@ -41,6 +41,14 @@ class NQOpen(Task):
     DATASET_PATH = "nq_open"
     DATASET_NAME = None
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+            self.DATASET_NAME = "nq_open"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -54,13 +62,13 @@ class NQOpen(Task):
         return self.dataset["train"]
 
     def validation_docs(self):
-        return self.dataset["validation"]
+        return self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"]
 
     def test_docs(self):
         raise NotImplementedError()
 
     def doc_to_text(self, doc):
-        return f"Q: {doc['question']}\nA:"
+        return f"Pitanje: {doc['question']}\nOdgovor:" if self._language == "Serbian" else f"Q: {doc['question']}\nA:"
 
     def should_decontaminate(self):
         return True
