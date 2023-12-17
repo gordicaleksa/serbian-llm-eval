@@ -10,6 +10,8 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--language", type=str, default="Serbian")
+
     parser.add_argument("--model", required=True)
     parser.add_argument("--model_args", default="")
     parser.add_argument(
@@ -81,6 +83,7 @@ def main():
         check_integrity=args.check_integrity,
         write_out=args.write_out,
         output_base_path=args.output_base_path,
+        language=args.language,
     )
 
     dumped = json.dumps(results, indent=2)

@@ -31,6 +31,14 @@ class ARCEasy(MultipleChoiceTask):
     DATASET_PATH = "ai2_arc"
     DATASET_NAME = "ARC-Easy"
 
+    def __init__(self, **kwargs):
+        language = kwargs.get("language", "English")
+        self._language = language
+        if language == "Serbian":
+            self.DATASET_NAME = "arc_easy" if self.DATASET_NAME == "ARC-Easy" else "arc_challenge"
+            self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+        super().__init__(**kwargs)
+
     def has_training_docs(self):
         return True
 
@@ -54,15 +62,23 @@ class ARCEasy(MultipleChoiceTask):
     def _process_doc(self, doc):
         # NOTE: Some `doc["answerKey"]`s are in numeric string format being one
         # of {'1', '2', '3', '4', '5'}. We map them back to letters.
-        num_to_letter = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
-        doc["answerKey"] = num_to_letter.get(doc["answerKey"], doc["answerKey"])
-        out_doc = {
-            "id": doc["id"],
-            "query": "Question: " + doc["question"] + "\nAnswer:",
-            "choices": doc["choices"]["text"],
-            "gold": ["A", "B", "C", "D", "E"].index(doc["answerKey"]),
-        }
-        return out_doc
+        if self._language == "Serbian":
+            return {
+                # "id": doc["id"],
+                "query": doc["query"],
+                "choices": doc["choices"],
+                "gold": doc["gold"],
+            }
+        else:
+            num_to_letter = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
+            doc["answerKey"] = num_to_letter.get(doc["answerKey"], doc["answerKey"])
+            out_doc = {
+                "id": doc["id"],
+                "query": "Question: " + doc["question"] + "\nAnswer:",
+                "choices": doc["choices"]["text"],
+                "gold": ["A", "B", "C", "D", "E"].index(doc["answerKey"]),
+            }
+            return out_doc
 
     def doc_to_text(self, doc):
         return doc["query"]
