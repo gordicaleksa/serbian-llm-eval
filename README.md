@@ -9,8 +9,6 @@ Note: it can likely also be used for other HBS languages (Croatian, Bosnian, Mon
 
 You can find the Serbian LLM eval dataset [on HuggingFace](https://huggingface.co/datasets/gordicaleksa/serbian-llm-eval-v1). For more details on how the dataset was built see [this technical report](https://wandb.ai/gordicaleksa/serbian_llm_eval/reports/First-Serbian-LLM-eval---Vmlldzo2MjgwMDA5) on Weights & Biases. The branch [serb_eval_translate](https://github.com/gordicaleksa/lm-evaluation-harness-serbian/tree/serb_eval_translate) was used to do machine translation, while [serb_eval_refine](https://github.com/gordicaleksa/lm-evaluation-harness-serbian/tree/serb_eval_refine) was used to do further refinement using GPT-4.
 
-
-
 Please email me at gordicaleksa at gmail com in case you're willing to sponsor the projects I'm working on.
 
 You will get the credits and eternal glory. :)
