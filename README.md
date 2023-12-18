@@ -62,7 +62,6 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 ## Silver sponsors
 - [**psk.rs**](https://psk.rs/)
 - [**OmniStreak**](https://omnistreak.com/)
-- [**Marko Radojicic**](https://www.linkedin.com/in/marko-radojicic-acmanik-cube/)
 - [**Luka Vazic**](https://www.linkedin.com/in/vazic/)
 - [**Miloš Durković**](https://www.linkedin.com/in/milo%C5%A1-d-684b99188/)
 - [**Marjan Radeski**](https://www.linkedin.com/in/marjanradeski/)
