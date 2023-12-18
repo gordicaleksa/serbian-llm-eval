@@ -38,6 +38,8 @@ pip install -e .
 
 `--num_fewshot` <- set the number of shots, should be 0 for all tasks except for `nq_open` and `triviaqa` (these should be run in 5-shot manner if you want to compare against Mistral 7B)
 
+`--batch_size` <- depending on your available VRAM set this as high as possible to get the max speed up
+
 ## Future work:
 
 * Cover popular aggregated results benchmarks: `MMLU`, `BBH`, `AGI Eval` and math: `GSM8K`, `MATH`
