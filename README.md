@@ -56,6 +56,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 
 ## Gold sponsors
 * **qq** (fizicko lice, anoniman)
+* [**Adam  Sofronijevic**](https://www.linkedin.com/in/adam-sofronijevic-685b911/)
 * [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
 * [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
 
@@ -71,6 +72,11 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 - [**Bojan Jevtic**](https://www.linkedin.com/in/bojanjevtic/)
 - [**Jelena Jovanović**](https://www.linkedin.com/in/eldumo/)
 - [**Nenad Davidović**](https://www.linkedin.com/in/nenad-davidovic-662ab749/)
+- [**TRENCH-NS**](https://www.linkedin.com/in/milorad-vukadinovic-64639926/)
+
+**Also a big thank you to the following individuals:**
+- [**Slobodan Markovic**](https://www.linkedin.com/in/smarkovic/) - for spreading the word! :)
+- [**Aleksander Segedin**](https://www.linkedin.com/in/aleksander-segedi-08430936/) - for help around bookkeeping
 
 ## Credits
 
