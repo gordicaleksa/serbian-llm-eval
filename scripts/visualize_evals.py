@@ -7,24 +7,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-categories_str = "arc_easy,arc_challenge,boolq,hellaswag,openbookqa,piqa,winogrande"  # ,triviaqa,nq_open
+categories_str = "arc_easy,arc_challenge,boolq,hellaswag,openbookqa,piqa,winogrande,triviaqa,nq_open"
 categories = categories_str.split(",")
 
 results_dir = "/home/aleksa/Projects/eval/english/lm-evaluation-harness/results_jsons"
 
 results = defaultdict(list)
 for result_file in os.listdir(results_dir):
-    if "trivia" in result_file:
-        continue
-    name = result_file.split(".json")[0].split("_")[0]
+    if result_file.startswith('triviaqa'):
+        name = result_file.split(".json")[0].split("_")[1]
+    else:
+        name = result_file.split(".json")[0].split("_")[0]
 
     with open(os.path.join(results_dir, result_file), "r") as f:
         data = json.load(f)["results"]
         for category in categories:
             if category in data:
-                results[name].append((category, data[category]["acc"]))
-            else:
-                raise ValueError(f"Category {category} not found in {result_file}")
+                results[name].append((category, data[category]["acc"] if "acc" in data[category] else data[category]["em"]))
+
+# sort the results according to categories
+for key in results.keys():
+    results[key].sort(key=lambda x: categories.index(x[0]))
 
 mistral_7B = [t[1] for t in results["mistral"]]
 llama_2_7B = [t[1] for t in results["llama2"]]
