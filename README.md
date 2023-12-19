@@ -63,19 +63,19 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 ## Silver sponsors
 - [**psk.rs**](https://psk.rs/)
 - [**OmniStreak**](https://omnistreak.com/)
-- [**Luka Vazic**](https://www.linkedin.com/in/vazic/)
+- [**Luka Važić**](https://www.linkedin.com/in/vazic/)
 - [**Miloš Durković**](https://www.linkedin.com/in/milo%C5%A1-d-684b99188/)
 - [**Marjan Radeski**](https://www.linkedin.com/in/marjanradeski/)
 - **Marjan Stankovic** (fizicko lice)
 - [**Nikola Stojiljkovic**](https://www.linkedin.com/in/nikola-stojiljkovic-10469239/)
-- [**Mihailo Tomic**](https://www.linkedin.com/in/mihailotomic/)
+- [**Mihailo Tomić**](https://www.linkedin.com/in/mihailotomic/)
 - [**Bojan Jevtic**](https://www.linkedin.com/in/bojanjevtic/)
 - [**Jelena Jovanović**](https://www.linkedin.com/in/eldumo/)
 - [**Nenad Davidović**](https://www.linkedin.com/in/nenad-davidovic-662ab749/)
 - [**TRENCH-NS**](https://www.linkedin.com/in/milorad-vukadinovic-64639926/)
 
 **Also a big thank you to the following individuals:**
-- [**Slobodan Markovic**](https://www.linkedin.com/in/smarkovic/) - for spreading the word! :)
+- [**Slobodan Marković**](https://www.linkedin.com/in/smarkovic/) - for spreading the word! :)
 - [**Aleksander Segedin**](https://www.linkedin.com/in/aleksander-segedi-08430936/) - for help around bookkeeping
 
 ## Credits
