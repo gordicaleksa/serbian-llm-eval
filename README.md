@@ -76,7 +76,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 
 **Also a big thank you to the following individuals:**
 - [**Slobodan Marković**](https://www.linkedin.com/in/smarkovic/) - for spreading the word! :)
-- [**Aleksander Segedin**](https://www.linkedin.com/in/aleksander-segedi-08430936/) - for help around bookkeeping
+- [**Aleksander Segedi**](https://www.linkedin.com/in/aleksander-segedi-08430936/) - for help around bookkeeping
 
 ## Credits
 
