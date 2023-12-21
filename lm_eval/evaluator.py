@@ -388,7 +388,7 @@ def save_human_readable(f_human_readable, reasoning, doc_eng, old_doc_srp, doc_s
     f_human_readable.flush()
 
 
-async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test, start_from_doc_index=None, end_doc_index=None):
+async def refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, is_test, start_from_doc_index=None, end_doc_index=None):
     template = get_prompt_template(prompt_templates_dir, task_name)
 
     NUM_ATTEMPTS_GPT4 = 2
@@ -838,14 +838,14 @@ async def refine_eval(task_dict_items, start_from_doc_index=None, end_doc_index=
             task_docs = list(task_doc_func())
             assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-            futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=True, start_from_doc_index=start_from_doc_index[task_idx], end_doc_index=end_doc_index))
+            futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, is_test=True, start_from_doc_index=start_from_doc_index[task_idx], end_doc_index=end_doc_index))
 
             if task_name in ["nq_open", "triviaqa"]:
                 task_docs_serbian = get_serbian_docs(in_dir, task_name, is_test=False)
                 task_docs = list(task.training_docs())
                 assert len(task_docs) == len(task_docs_serbian), f"Expected same number of docs, but found {len(task_docs)} and {len(task_docs_serbian)}"
 
-                futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, in_dir, is_test=False, start_from_doc_index=start_from_doc_index))
+                futures.append(refine_dataset(instructor, task_docs, task_docs_serbian, task_name, prompt_templates_dir, out_dir, is_test=False, start_from_doc_index=start_from_doc_index[task_idx], end_doc_index=end_doc_index))
 
         await asyncio.gather(*futures)
         print('all tasks done')
