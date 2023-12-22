@@ -30,6 +30,8 @@ cd lm-evaluation-harness-serbian
 pip install -e .
 ```
 
+Currently you might need to manually install also the following packages (do pip install): `sentencepiece`, `protobuf`, and one more (submit PR if you hit this).
+
 ### Step 2. Tweak the launch json and run
 
 `--model_args` <- any name from HuggingFace or a path to HuggingFace compatible checkpoint will work
@@ -73,6 +75,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 - [**Jelena Jovanović**](https://www.linkedin.com/in/eldumo/)
 - [**Nenad Davidović**](https://www.linkedin.com/in/nenad-davidovic-662ab749/)
 - [**TRENCH-NS**](https://www.linkedin.com/in/milorad-vukadinovic-64639926/)
+- [**Nemanja Grujičić**](https://twitter.com/nemanjagrujicic)
 
 **Also a big thank you to the following individuals:**
 - [**Slobodan Marković**](https://www.linkedin.com/in/smarkovic/) - for spreading the word! :)
