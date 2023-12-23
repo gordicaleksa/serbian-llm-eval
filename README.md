@@ -54,14 +54,14 @@ Thanks to all of our sponsor(s) for donating for the [yugoGPT](https://www.linke
 yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 
 ## Platinum sponsors
-* <b>Ivan</b> (fizicko lice, anoniman)
+* <b>Ivan</b> (anon)
 
 ## Gold sponsors
-* **qq** (fizicko lice, anoniman)
+* **qq** (anon)
 * [**Adam  Sofronijevic**](https://www.linkedin.com/in/adam-sofronijevic-685b911/)
 * [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
 * [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
-* [**Rational Development DOO**]
+* **Rational Development DOO**
 
 ## Silver sponsors
 - [**psk.rs**](https://psk.rs/)
@@ -69,7 +69,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 - [**Luka Važić**](https://www.linkedin.com/in/vazic/)
 - [**Miloš Durković**](https://www.linkedin.com/in/milo%C5%A1-d-684b99188/)
 - [**Marjan Radeski**](https://www.linkedin.com/in/marjanradeski/)
-- **Marjan Stankovic** (fizicko lice)
+- **Marjan Stankovic**
 - [**Nikola Stojiljkovic**](https://www.linkedin.com/in/nikola-stojiljkovic-10469239/)
 - [**Mihailo Tomić**](https://www.linkedin.com/in/mihailotomic/)
 - [**Bojan Jevtic**](https://www.linkedin.com/in/bojanjevtic/)
