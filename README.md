@@ -59,6 +59,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 ## Gold sponsors
 * **qq** (anon)
 * [**Adam  Sofronijevic**](https://www.linkedin.com/in/adam-sofronijevic-685b911/)
+* [**Yanado**](https://yanado.com/)
 * [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
 * [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
 * **Rational Development DOO**
