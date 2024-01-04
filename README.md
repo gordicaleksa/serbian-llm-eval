@@ -63,6 +63,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 * [**Mitar Perovic**](https://www.linkedin.com/in/perovicmitar/)
 * [**Nikola Ivancevic**](https://www.linkedin.com/in/nivancevic/)
 * **Rational Development DOO**
+* [**Ivan**](https://www.linkedin.com/in/ivan-kokic-258262175/) i [**Natalija Kokić**](https://www.linkedin.com/in/natalija-kokic-19a458131/)
 
 ## Silver sponsors
 - [**psk.rs**](https://psk.rs/)
