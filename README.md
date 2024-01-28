@@ -80,6 +80,7 @@ yugoGPT base model will soon be open-source under permissive Apache 2.0 license.
 - [**Mika Tasich**](https://www.linkedin.com/in/mikatasich/)
 - [**TRENCH-NS**](https://www.linkedin.com/in/milorad-vukadinovic-64639926/)
 - [**Nemanja Grujičić**](https://twitter.com/nemanjagrujicic)
+- [**Mladen Fernežir**](https://www.linkedin.com/in/mladen-fernezir/)
 - [**tim011**](https://knjigovodja.in.rs/sh)
 
 **Also a big thank you to the following individuals:**
