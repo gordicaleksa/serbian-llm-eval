@@ -37,6 +37,9 @@ class ARCEasy(MultipleChoiceTask):
         if language == "Serbian":
             self.DATASET_NAME = "arc_easy" if self.DATASET_NAME == "ARC-Easy" else "arc_challenge"
             self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+        elif language == "Slovenian":
+            self.DATASET_NAME = "arc_easy" if self.DATASET_NAME == "ARC-Easy" else "arc_challenge"
+            self.DATASET_PATH = "gordicaleksa/slovenian-llm-eval-v0"
         super().__init__(**kwargs)
 
     def has_training_docs(self):
@@ -62,7 +65,7 @@ class ARCEasy(MultipleChoiceTask):
     def _process_doc(self, doc):
         # NOTE: Some `doc["answerKey"]`s are in numeric string format being one
         # of {'1', '2', '3', '4', '5'}. We map them back to letters.
-        if self._language == "Serbian":
+        if self._language == "Serbian" or self._language == "Slovenian":
             return {
                 # "id": doc["id"],
                 "query": doc["query"],

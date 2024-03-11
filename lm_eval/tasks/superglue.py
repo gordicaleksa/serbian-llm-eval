@@ -42,6 +42,8 @@ class BoolQ(Task):
         self._language = language
         if language == "Serbian":
             self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
+        elif language == "Slovenian":
+            self.DATASET_PATH = "gordicaleksa/slovenian-llm-eval-v0"
         super().__init__(**kwargs)
 
     def has_training_docs(self):
@@ -59,11 +61,13 @@ class BoolQ(Task):
         return self._training_docs
 
     def validation_docs(self):
-        return self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"]
+        return self.dataset["test"] if self._language in ["Serbian", "Slovenian"] else self.dataset["validation"]
 
     def doc_to_text(self, doc):
         if self._language == "Serbian":
             return f"{doc['passage']}\nPitanje: {doc['question']}?\nOdgovor:"
+        elif self._language == "Slovenian":
+            return f"{doc['passage']}\nVprašanje: {doc['question']}?\nOdgovor:"
         else:
             return f"{doc['passage']}\nQuestion: {doc['question']}?\nAnswer:"
 
@@ -78,8 +82,18 @@ class BoolQ(Task):
 
     def construct_requests(self, doc, ctx):
 
-        ll_yes, _ = rf.loglikelihood(ctx, " da" if self._language == "Serbian" else " yes")
-        ll_no, _ = rf.loglikelihood(ctx, " ne" if self._language == "Serbian" else " no")
+        if self._language == "Serbian":
+            yes = " da"
+            no = " ne"
+        elif self._language == "Slovenian":
+            yes = " ja"
+            no = " ne"
+        else:
+            yes = " yes"
+            no = " no"
+
+        ll_yes, _ = rf.loglikelihood(ctx, yes)
+        ll_no, _ = rf.loglikelihood(ctx, no)
 
         return ll_yes, ll_no
 

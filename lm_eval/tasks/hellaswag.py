@@ -38,6 +38,9 @@ class HellaSwag(MultipleChoiceTask):
         if language == "Serbian":
             self.DATASET_PATH = "gordicaleksa/serbian-llm-eval-v1"
             self.DATASET_NAME = "hellaswag"
+        elif language == "Slovenian":
+            self.DATASET_PATH = "gordicaleksa/slovenian-llm-eval-v0"
+            self.DATASET_NAME = "hellaswag"
         super().__init__(**kwargs)
 
     def has_training_docs(self):
@@ -55,10 +58,10 @@ class HellaSwag(MultipleChoiceTask):
         return self._training_docs
 
     def validation_docs(self):
-        return map(self._process_doc, self.dataset["test"] if self._language == "Serbian" else self.dataset["validation"])
+        return map(self._process_doc, self.dataset["test"] if self._language in ["Serbian", "Slovenian"] else self.dataset["validation"])
 
     def _process_doc(self, doc):
-        if self._language == "Serbian":
+        if self._language in ["Serbian", "Slovenian"]:
             return {
                 "query": doc["query"],
                 "choices": doc["choices"],
